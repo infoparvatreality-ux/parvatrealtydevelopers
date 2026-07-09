@@ -1,0 +1,62 @@
+/* 1. पूरी वेबसाइट के डार्क बैकग्राउंड को वाइट और लाइट स्लेट में बदलें */
+body, 
+.min-h-screen, 
+.bg-neutral-950, 
+.bg-neutral-900, 
+.bg-black,
+div[class*="bg-neutral"],
+section[class*="bg-neutral"] {
+    background-color: #ffffff !important;
+    background-image: none !important;
+}
+
+/* हल्का स्लेट रंग कुछ सेक्शन्स के लिए ताकि डिज़ाइन प्रीमियम लगे */
+section:nth-of-type(even), 
+#action-buttons-row, 
+#join-our-family, 
+.bg-slate-50 {
+    background-color: #f8fafc !important;
+}
+
+/* 2. सभी टेक्स्ट (Heading, Paragraph, Span) को डार्क स्लेट (Dark Slate) करें ताकि वाइट पर साफ़ दिखे */
+h1, h2, h3, h4, h5, h6,
+h1 *, h2 *, h3 *, h4 *, h5 *, h6 *,
+.text-white, 
+.text-neutral-100, 
+.text-neutral-200,
+[class*="text-neutral"],
+[class*="text-white"] {
+    color: #0f172a !important;
+}
+
+p, span, a, label, li,
+.text-neutral-300, 
+.text-neutral-400 {
+    color: #334155 !important;
+}
+
+/* 3. सभी ऑरेंज/अम्बर बटन्स और हाइलाइट्स को रॉयल ब्लू (Royal Blue) करें */
+.text-amber-500, .text-amber-400, [class*="text-amber"] {
+    color: #1d4ed8 !important;
+}
+
+.bg-amber-500, .bg-amber-600, .from-amber-600, .to-amber-500,
+button[class*="bg-amber"],
+[class*="from-amber"] {
+    background: #1d4ed8 !important;
+    background-image: linear-gradient(to right, #1d4ed8, #2563eb) !important;
+    color: #ffffff !important;
+}
+
+/* बटन के अंदर के सफ़ेद टेक्स्ट को जबरदस्ती सफ़ेद रखना */
+button text, 
+button span, 
+.bg-blue-600 *,
+button[type="submit"] {
+    color: #ffffff !important;
+}
+
+/* 4. बॉर्डर को हल्का करें ताकि काली लाइनें न दिखें */
+div, section, button, input {
+    border-color: #e2e8f0 !important;
+}

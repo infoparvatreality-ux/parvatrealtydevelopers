@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "../theme.css";
+
+@theme {
+  --animate-fade-in-up: fade-in-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+#hero-slider h1 {
+  color: #d8dce5 !important;
+}
+
+#hero-slider span {
+  color: #ffffff !important;
+}
+
+#hero-slider svg {
+  color: #f2f3f6 !important;
+}
+
+#hero-slider svg circle {
+  color: #f6f6f7 !important;
+}
+
+#hero-slider p {
+  color: #c4c5c7 !important;
+}
+
+#features-showcase h2 {
+  color: #e4e7ec !important;
+}
+
+section#action-buttons-row {
+  background-color: transparent !important;
+  border-bottom: none !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.book-appointment-btn,
+.book-appointment-btn * {
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.call-now-btn {
+  background-color: #ffffff !important;
+  border-color: #112349 !important;
+}
+
+.call-now-btn,
+.call-now-btn * {
+  color: #112349 !important;
+}
+
+.whatsapp-btn,
+.whatsapp-btn * {
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+/* Premium Royal Blue Footer overrides */
+footer.premium-footer {
+  background-color: #1a365d !important; /* Rich deep corporate royal blue */
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+footer.premium-footer,
+footer.premium-footer *,
+footer.premium-footer h4,
+footer.premium-footer h5,
+footer.premium-footer p,
+footer.premium-footer span,
+footer.premium-footer a,
+footer.premium-footer li,
+footer.premium-footer svg {
+  color: #ffffff !important;
+}
+
+footer.premium-footer div,
+footer.premium-footer section,
+footer.premium-footer border-t {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+footer.premium-footer .social-icon-btn {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+footer.premium-footer .social-icon-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+footer.premium-footer a:hover {
+  color: #cbd5e1 !important;
+  opacity: 0.9 !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#features-showcase:nth-of-type(6) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) {
+  color: #f6f8ff !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section#hot-properties:nth-of-type(4) > div:nth-of-type(1) > div:nth-of-type(3) > div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) {
+  background-color: #fffefe !important;
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > p:nth-of-type(1) {
+  /* No visual style changes requested */
+}
+
+div#root:nth-of-type(1) > div:nth-of-type(1) > section:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(2) > div:nth-of-type(1) > div:nth-of-type(1) > p:nth-of-type(1) {
+  /* No visual style changes requested */
+}
+
+
+
+
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
