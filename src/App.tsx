@@ -1359,6 +1359,17 @@ export default function App() {
       };
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+      // Save to Hostinger MySQL Database via backend API
+      fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          details: `Email: ${formData.email} | Source: Main Banner Modal | Interest: ${formData.plotType || 'Buy Farmhouse Land'} | Message: ${formData.message}`
+        })
+      }).catch(err => console.error("Failed to post lead to backend database:", err));
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1398,6 +1409,17 @@ export default function App() {
       };
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+      // Save to Hostinger MySQL Database via backend API
+      fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: appointmentForm.name,
+          phone: appointmentForm.mobile,
+          details: `Email: ${appointmentForm.email} | Source: Main Banner Modal | Interest: ${appointmentForm.interest || 'Buy Farmhouse Land'}`
+        })
+      }).catch(err => console.error("Failed to post lead to backend database:", err));
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1442,6 +1464,17 @@ export default function App() {
       };
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+      // Save to Hostinger MySQL Database via backend API
+      fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: joinFamilyForm.name,
+          phone: joinFamilyForm.phone,
+          details: `Email: ${joinFamilyForm.email} | Source: Bottom Registration Form | Interest: ${joinFamilyForm.preferredProperty || 'Residential Plots'}`
+        })
+      }).catch(err => console.error("Failed to post lead to backend database:", err));
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1491,6 +1524,17 @@ export default function App() {
       };
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+      // Save to Hostinger MySQL Database via backend API
+      fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: corporateForm.name,
+          phone: corporateForm.phone,
+          details: `Email: ${corporateForm.email} | Source: Corporate Enquiry Form | Age: ${corporateForm.age || 'N/A'} | Gender: ${corporateForm.gender || 'Corporate'} | Message: ${corporateForm.message}`
+        })
+      }).catch(err => console.error("Failed to post lead to backend database:", err));
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -3950,6 +3994,17 @@ export default function App() {
                             };
                             existingLeads.unshift(newLead);
                             localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+                            // Save to Hostinger MySQL Database via backend API
+                            fetch('/api/appointments', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                name: nameVal,
+                                phone: phoneVal,
+                                details: `Source: Property Page Callback | Interest: ${proj ? proj.title : 'General Land Asset'}`
+                              })
+                            }).catch(err => console.error("Failed to post lead to backend database:", err));
                           } catch (err) {
                             console.error("Error saving property lead:", err);
                           }

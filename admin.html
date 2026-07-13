@@ -4361,6 +4361,92 @@
             document.getElementById('dashboard-home').classList.add('hidden');
             document.getElementById('leads-module').classList.remove('hidden');
             window.renderLeadsTable();
+
+            // Fetch latest appointments from Hostinger MySQL DB with admin credentials
+            const sessionStr = sessionStorage.getItem('parvat_admin_session');
+            if (!sessionStr) {
+                alert("Session expired. Please log in again.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const sessionData = JSON.parse(sessionStr);
+                const token = sessionData.token || 'secure_admin_session_token_998877';
+                const email = sessionData.email || 'admin@parvatreality.com';
+
+                fetch('/api/appointments', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Admin-Email': email
+                    }
+                })
+                .then(res => {
+                    if (res.status === 401) {
+                        alert("Access Denied: Invalid or expired admin credentials.");
+                        sessionStorage.removeItem('parvat_admin_session');
+                        window.location.href = 'login.html';
+                        throw new Error("Unauthorized");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    const dbAppointments = data.appointments || [];
+                    if (Array.isArray(dbAppointments)) {
+                        const existingLeads = window.getLeads();
+                        let updated = false;
+
+                        dbAppointments.forEach(item => {
+                            const dbId = 'db_' + item.id;
+                            // Avoid duplicates by checking name and phone or DB ID
+                            const exists = existingLeads.some(l => l.id === dbId || (l.name === item.name && l.phone === item.phone));
+                            if (!exists) {
+                                // Extract email/source/interest if encoded in the details string
+                                let parsedEmail = 'N/A';
+                                let parsedInterest = 'Buy Farmhouse Land';
+                                let parsedSource = 'Hostinger Database';
+
+                                if (item.details) {
+                                    const emailMatch = item.details.match(/Email:\s*([^|]+)/);
+                                    const sourceMatch = item.details.match(/Source:\s*([^|]+)/);
+                                    const interestMatch = item.details.match(/Interest:\s*([^|]+)/);
+
+                                    if (emailMatch) parsedEmail = emailMatch[1].trim();
+                                    if (sourceMatch) parsedSource = sourceMatch[1].trim();
+                                    if (interestMatch) parsedInterest = interestMatch[1].trim();
+                                }
+
+                                const dateVal = item.created_at 
+                                    ? new Date(item.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                                    : new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+                                existingLeads.unshift({
+                                    id: dbId,
+                                    name: item.name,
+                                    phone: item.phone,
+                                    email: parsedEmail,
+                                    age: 'N/A',
+                                    gender: 'Enquiry',
+                                    interest: parsedInterest,
+                                    leadSource: parsedSource,
+                                    date: dateVal
+                                });
+                                updated = true;
+                            }
+                        });
+
+                        if (updated) {
+                            window.saveLeads(existingLeads);
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error("Failed to sync database appointments:", err);
+                });
+            } catch (e) {
+                console.error("Failed to parse session storage:", e);
+                window.location.href = 'login.html';
+            }
         };
 
         window.closeLeadsModule = function() {
