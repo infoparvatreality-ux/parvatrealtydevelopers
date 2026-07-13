@@ -13,7 +13,7 @@
             } else {
                 try {
                     const sessionData = JSON.parse(sessionStr);
-                    if (sessionData.email !== 'admin@parvatreality.com') {
+                    if (sessionData.email !== 'admin@parvatreality.com' && sessionData.email !== 'omkarwanve7@gmail.com') {
                         sessionStorage.removeItem('parvat_admin_session');
                         window.location.replace('login.html');
                     }
@@ -4393,7 +4393,7 @@
             try {
                 const sessionData = JSON.parse(sessionStr);
                 const token = sessionData.token || 'secure_admin_session_token_998877';
-                const email = sessionData.email || 'admin@parvatreality.com';
+                const email = sessionData.email || 'omkarwanve7@gmail.com';
 
                 fetch('/api.php', {
                     headers: {
@@ -4763,7 +4763,7 @@ Source: ${source}`;
         if (existingSession) {
             try {
                 const sessionData = JSON.parse(existingSession);
-                if (sessionData.email === 'admin@parvatreality.com') {
+                if (sessionData.email === 'admin@parvatreality.com' || sessionData.email === 'omkarwanve7@gmail.com') {
                     loginContainer.classList.add('hidden');
                     adminDashboard.classList.remove('hidden');
                     if (userEmailSpan) {

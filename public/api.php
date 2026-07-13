@@ -59,7 +59,7 @@ if ($method === 'POST') {
     $adminEmail = isset($_SERVER['HTTP_X_ADMIN_EMAIL']) ? $_SERVER['HTTP_X_ADMIN_EMAIL'] : '';
 
     // Allow authenticated admin session (secure session token)
-    if ($adminEmail !== "admin@parvatreality.com" || $authHeader !== "Bearer secure_admin_session_token_998877") {
+    if (($adminEmail !== "admin@parvatreality.com" && $adminEmail !== "omkarwanve7@gmail.com") || $authHeader !== "Bearer secure_admin_session_token_998877") {
         http_response_code(401);
         echo json_encode(["success" => false, "error" => "Access Denied: Unauthorized admin session."]);
         exit();

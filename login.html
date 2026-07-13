@@ -171,11 +171,11 @@
                 `;
 
                 // Verify the credentials directly against the authorized administrator credentials in frontend JS state
-                if (email === "admin@parvatreality.com" && password === "admin123") {
+                if ((email === "admin@parvatreality.com" || email === "omkarwanve7@gmail.com") && password === "admin123") {
                     // Store secure local session for admin
                     sessionStorage.setItem('parvat_admin_session', JSON.stringify({
-                        email: "admin@parvatreality.com",
-                        displayName: "Parvat Admin",
+                        email: email,
+                        displayName: email === "omkarwanve7@gmail.com" ? "Omkar Wanve" : "Parvat Admin",
                         token: "secure_admin_session_token_998877"
                     }));
 
