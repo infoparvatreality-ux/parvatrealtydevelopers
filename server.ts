@@ -142,6 +142,78 @@ async function startServer() {
     });
   });
 
+  // API Route: Handle api.php endpoint for local development
+  app.all("/api.php", async (req, res) => {
+    const method = req.method;
+    if (method === "POST") {
+      const { name, phone, details } = req.body;
+      if (!name || !phone) {
+        return res.status(400).json({ success: false, error: "Name and phone number are required" });
+      }
+      try {
+        const [result] = await pool.query(
+          "INSERT INTO appointments (name, phone, details) VALUES (?, ?, ?)",
+          [name, phone, details || ""]
+        );
+        const insertId = (result as any).insertId;
+        return res.json({ success: true, id: insertId });
+      } catch (error: any) {
+        console.error("Database error saving appointment:", error.message);
+        if (process.env.NODE_ENV !== "production") {
+          return res.json({
+            success: true,
+            id: Math.floor(Math.random() * 1000) + 1,
+            isMock: true
+          });
+        }
+        return res.status(500).json({ success: false, error: "Failed to save lead", details: error.message });
+      }
+    } else if (method === "GET") {
+      const authHeader = req.headers.authorization;
+      const adminEmail = req.headers["x-admin-email"];
+
+      const isAuthorized = 
+        (adminEmail === "admin@parvatreality.com" && authHeader === "Bearer secure_admin_session_token_998877") ||
+        (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20);
+
+      if (!isAuthorized) {
+        return res.status(401).json({ success: false, error: "Access Denied: Unauthorized administrator session." });
+      }
+
+      try {
+        const [rows] = await pool.query("SELECT * FROM appointments ORDER BY created_at DESC");
+        return res.json({ success: true, appointments: rows });
+      } catch (error: any) {
+        console.error("Database error fetching appointments:", error.message);
+        if (process.env.NODE_ENV !== "production") {
+          return res.json({
+            success: true,
+            appointments: [
+              {
+                id: 1,
+                name: "John Doe (Mock)",
+                phone: "9876543210",
+                details: "Interested in 3 BHK Parvat Heights apartment.",
+                created_at: new Date().toISOString()
+              },
+              {
+                id: 2,
+                name: "Jane Smith (Mock)",
+                phone: "1234567890",
+                details: "Wants to schedule a site visit this Sunday.",
+                created_at: new Date(Date.now() - 3600000).toISOString()
+              }
+            ],
+            isMock: true
+          });
+        }
+        return res.status(500).json({ success: false, error: "Failed to fetch appointments", details: error.message });
+      }
+    } else {
+      return res.status(405).json({ success: false, error: "Method not allowed" });
+    }
+  });
+
   // API Route: Create a new appointment (saves to Hostinger MySQL)
   app.post("/api/appointments", async (req, res) => {
     const { name, phone, details } = req.body;

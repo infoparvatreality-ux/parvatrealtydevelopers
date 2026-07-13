@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - Parvat Reality</title>
+    <script>
+        // Immediate session verification before parsing body to prevent flicker or unauthenticated visual access
+        (function() {
+            const sessionStr = sessionStorage.getItem('parvat_admin_session');
+            if (!sessionStr) {
+                window.location.replace('login.html');
+            } else {
+                try {
+                    const sessionData = JSON.parse(sessionStr);
+                    if (sessionData.email !== 'admin@parvatreality.com') {
+                        sessionStorage.removeItem('parvat_admin_session');
+                        window.location.replace('login.html');
+                    }
+                } catch (e) {
+                    sessionStorage.removeItem('parvat_admin_session');
+                    window.location.replace('login.html');
+                }
+            }
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -4375,7 +4395,7 @@
                 const token = sessionData.token || 'secure_admin_session_token_998877';
                 const email = sessionData.email || 'admin@parvatreality.com';
 
-                fetch('/api/appointments', {
+                fetch('/api.php', {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'X-Admin-Email': email
@@ -4731,109 +4751,44 @@ Source: ${source}`;
                  .replace(/'/g, "&#039;");
         }
     </script>
-    <!-- Firebase Auth Module Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-        // Firebase Configuration (supports environment injection or manual editing)
-        const firebaseConfig = {
-            apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAGlFNQRnNpRZ6JxqPThm7sXAYCLyRBY48",
-            authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "parvatrealitydevelopers-a18c8.firebaseapp.com",
-            projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "parvatrealitydevelopers-a18c8",
-            storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "parvatrealitydevelopers-a18c8.appspot.com",
-            messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "903673322137",
-            appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:903673322137:web:6c098df90b6cb4057816df"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
+    <!-- Direct Client-Side Session Control -->
+    <script>
         const loginContainer = document.getElementById('login-container');
         const adminDashboard = document.getElementById('admin-dashboard');
-        const googleSigninBtn = document.getElementById('google-signin-btn');
         const userEmailSpan = document.getElementById('user-email');
         const signoutBtn = document.getElementById('signout-btn');
 
-        // Handle Google Sign-In via Popup
-        googleSigninBtn.addEventListener('click', async () => {
-            try {
-                googleSigninBtn.disabled = true;
-                googleSigninBtn.innerHTML = `
-                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-slate-700 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Signing in...
-                `;
-                await signInWithPopup(auth, provider);
-            } catch (error) {
-                console.error("Sign in error:", error);
-                alert("Failed to sign in with Google: " + error.message);
-                googleSigninBtn.disabled = false;
-                googleSigninBtn.innerHTML = `
-                    <svg class="w-4 h-4 inline mr-2" viewBox="0 0 24 24">
-                        <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.27C17.67 1.54 15.01 0 12 0 7.31 0 3.25 2.69 1.25 6.63l3.87 3C6.06 6.88 8.81 5.04 12 5.04z"/>
-                        <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.4 3.58l3.72 2.88c2.18-2.01 3.71-4.97 3.71-8.61z"/>
-                        <path fill="#FBBC05" d="M5.12 14.37c-.24-.72-.37-1.5-.37-2.37s.13-1.65.37-2.37V6.63H1.25C.45 8.24 0 10.06 0 12s.45 3.76 1.25 5.37l3.87-3z"/>
-                        <path fill="#34A853" d="M12 24c3.24 0 5.97-1.07 7.96-2.91l-3.72-2.88c-1.04.7-2.38 1.11-4.24 1.11-3.19 0-5.94-1.84-6.88-4.59l-3.87 3C3.25 21.31 7.31 24 12 24z"/>
-                    </svg>
-                    Sign in with Google
-                `;
-            }
-        });
-
-        // Check for existing sessionStorage session immediately to prevent flicker
+        // Check for existing sessionStorage session to render layout
         const existingSession = sessionStorage.getItem('parvat_admin_session');
         if (existingSession) {
             try {
                 const sessionData = JSON.parse(existingSession);
-                loginContainer.classList.add('hidden');
-                adminDashboard.classList.remove('hidden');
-                if (userEmailSpan) {
-                    userEmailSpan.innerText = sessionData.email;
+                if (sessionData.email === 'admin@parvatreality.com') {
+                    loginContainer.classList.add('hidden');
+                    adminDashboard.classList.remove('hidden');
+                    if (userEmailSpan) {
+                        userEmailSpan.innerText = sessionData.email;
+                    }
+                } else {
+                    sessionStorage.removeItem('parvat_admin_session');
+                    window.location.replace('login.html');
                 }
             } catch (e) {
                 console.error("Error parsing admin session:", e);
+                sessionStorage.removeItem('parvat_admin_session');
+                window.location.replace('login.html');
             }
+        } else {
+            window.location.replace('login.html');
         }
 
         // Handle Sign-Out
-        signoutBtn.addEventListener('click', async () => {
-            try {
+        if (signoutBtn) {
+            signoutBtn.addEventListener('click', () => {
                 sessionStorage.removeItem('parvat_admin_session');
-                await signOut(auth);
-                window.location.href = 'login.html';
-            } catch (error) {
-                console.error("Sign out error:", error);
-                window.location.href = 'login.html';
-            }
-        });
-
-        // Listen for Authentication State Changes
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // Success: Unlock & show dashboard content
-                sessionStorage.setItem('parvat_admin_session', JSON.stringify({
-                    email: user.email,
-                    displayName: user.displayName || 'Admin',
-                    token: user.accessToken || ''
-                }));
-                loginContainer.classList.add('hidden');
-                adminDashboard.classList.remove('hidden');
-                if (userEmailSpan) {
-                    userEmailSpan.innerText = user.email;
-                }
-            } else {
-                // If there's also no sessionStorage session, lock the dashboard
-                if (!sessionStorage.getItem('parvat_admin_session')) {
-                    loginContainer.classList.remove('hidden');
-                    adminDashboard.classList.add('hidden');
-                }
-            }
-        });
+                window.location.replace('login.html');
+            });
+        }
     </script>
 
 </body>

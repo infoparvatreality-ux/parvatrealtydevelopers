@@ -1360,8 +1360,8 @@ export default function App() {
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
-      // Save to Hostinger MySQL Database via backend API
-      fetch('/api/appointments', {
+      // Save to Hostinger MySQL Database via backend API (api.php)
+      fetch('/api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1410,8 +1410,8 @@ export default function App() {
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
-      // Save to Hostinger MySQL Database via backend API
-      fetch('/api/appointments', {
+      // Save to Hostinger MySQL Database via backend API (api.php)
+      fetch('/api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1465,8 +1465,8 @@ export default function App() {
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
-      // Save to Hostinger MySQL Database via backend API
-      fetch('/api/appointments', {
+      // Save to Hostinger MySQL Database via backend API (api.php)
+      fetch('/api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1525,8 +1525,8 @@ export default function App() {
       existingLeads.unshift(newLead);
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
-      // Save to Hostinger MySQL Database via backend API
-      fetch('/api/appointments', {
+      // Save to Hostinger MySQL Database via backend API (api.php)
+      fetch('/api.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -3995,8 +3995,8 @@ export default function App() {
                             existingLeads.unshift(newLead);
                             localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
-                            // Save to Hostinger MySQL Database via backend API
-                            fetch('/api/appointments', {
+                            // Save to Hostinger MySQL Database via backend API (api.php)
+                            fetch('/api.php', {
                               method: 'POST',
                               headers: { 'Content-Type': 'application/json' },
                               body: JSON.stringify({
