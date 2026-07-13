@@ -37,7 +37,7 @@ async function initializeDatabase() {
     console.log("MySQL appointments table checked/created successfully.");
     connection.release();
   } catch (error: any) {
-    console.error("MySQL Database initialization failed (expected if local MySQL is inactive):", error.message);
+    console.warn("MySQL Database initialization failed (expected if local MySQL is inactive):", error.message);
   }
 }
 
