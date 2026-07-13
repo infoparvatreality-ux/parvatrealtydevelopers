@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
-import ParvatLogo from './components/ParvatLogo';
 import { 
   ChevronLeft, 
   ChevronRight, 
-  Upload, 
   MapPin, 
   Phone, 
   Mail, 
@@ -808,9 +806,6 @@ export default function App() {
     }
     return DEFAULT_SLIDES;
   });
-  const [logoUrl, setLogoUrl] = useState<string | null>(() => {
-    return localStorage.getItem('parvat_logo') || null;
-  });
   const [whatsappChannelUrl, setWhatsappChannelUrl] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('parvat_whatsapp_channel_url') || 'https://whatsapp.com/channel/0029Va9xyz';
@@ -826,7 +821,6 @@ export default function App() {
     }
     return DEFAULT_PROJECTS;
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Active page state for multi-page simulation
   const [activePage, setActivePage] = useState<string>(() => {
@@ -970,15 +964,6 @@ export default function App() {
       setActivePropertyTab(defaultTab);
     }
   }, [activeProjects, activePropertyTab]);
-
-  // Save logoUrl to localStorage when changed
-  useEffect(() => {
-    if (logoUrl) {
-      localStorage.setItem('parvat_logo', logoUrl);
-    } else {
-      localStorage.removeItem('parvat_logo');
-    }
-  }, [logoUrl]);
 
   // Sync WhatsApp Channel URL and other dynamic News configs on active page/view change
   useEffect(() => {
@@ -1313,23 +1298,6 @@ export default function App() {
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
-  const handleLogoUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          setLogoUrl(event.target.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -1571,38 +1539,16 @@ export default function App() {
             
             {/* Left Side: Brand Logo Header */}
             <div className="flex items-center space-x-2">
-              <div className="relative group flex items-center">
+              <div className="flex items-center">
                 {/* Main Logo: Click to navigate home with professional hover effects */}
                 <a 
                   href="/index.html"
                   className="cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.04] hover:rotate-[-0.5deg] active:scale-[0.98] block"
                   title="Go to Home"
                 >
-                  {logoUrl ? (
-                    <img src={logoUrl} alt="Parvat Reality Logo" className="h-14 md:h-16 w-auto object-contain" />
-                  ) : (
-                    <ParvatLogo className="h-14 md:h-16 w-auto text-slate-900" />
-                  )}
+                  <img src="/logo.png" alt="Parvat Reality Logo" className="h-14 md:h-16 w-auto object-contain rounded-lg border border-slate-100 shadow-sm" referrerPolicy="no-referrer" />
                 </a>
-
-                {/* Hover customization overlay: Click to upload custom logo */}
-                <button 
-                  onClick={handleLogoUploadClick}
-                  className="absolute -right-2 -bottom-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-blue-600 p-1 rounded-full shadow-md transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 translate-y-1 group-hover:translate-y-0 scale-90 hover:scale-100 cursor-pointer z-10"
-                  title="Upload a custom logo live"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                </button>
               </div>
-
-              {/* Working hidden file input */}
-              <input 
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleLogoChange}
-                className="hidden"
-              />
             </div>
 
             {/* Center: Visible links for desktop */}
