@@ -19,6 +19,11 @@ const pool = mysql.createPool(dbConfig);
 
 // Asynchronously initialize database in background
 async function initializeDatabase() {
+  if (!process.env.DB_HOST || process.env.DB_HOST === "localhost" || process.env.DB_HOST === "127.0.0.1") {
+    console.log("Database: Local environment detected (no DB_HOST set or localhost). Bypassing real database connection.");
+    return;
+  }
+
   try {
     console.log("Initializing MySQL database connection...");
     const connection = await pool.getConnection();
@@ -37,7 +42,7 @@ async function initializeDatabase() {
     console.log("MySQL appointments table checked/created successfully.");
     connection.release();
   } catch (error: any) {
-    console.warn("MySQL Database initialization failed (expected if local MySQL is inactive):", error.message);
+    console.log("Database: External MySQL connection is currently not reachable. Sandbox mode active.");
   }
 }
 

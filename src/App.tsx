@@ -34,30 +34,57 @@ import {
   Shield
 } from 'lucide-react';
 
+const getAmenityDetails = (amenity: string) => {
+  let Icon = Compass;
+  let bgClass = "bg-slate-500/10 hover:bg-slate-500/20 text-slate-300 border-slate-500/20";
+  let iconColor = "text-slate-400";
+
+  const lower = amenity.toLowerCase();
+  if (lower.includes('electricity') || lower.includes('power')) {
+    Icon = Zap;
+    bgClass = "bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border-amber-500/20";
+    iconColor = "text-amber-400";
+  } else if (lower.includes('water')) {
+    Icon = Droplet;
+    bgClass = "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/20";
+    iconColor = "text-blue-400";
+  } else if (lower.includes('road') || lower.includes('access')) {
+    Icon = Map;
+    bgClass = "bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border-emerald-500/20";
+    iconColor = "text-emerald-400";
+  } else if (lower.includes('fencing') || lower.includes('shield') || lower.includes('security')) {
+    Icon = Shield;
+    bgClass = "bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-300 border-indigo-500/20";
+    iconColor = "text-indigo-400";
+  }
+
+  return { Icon, bgClass, iconColor };
+};
+
 const DEFAULT_SLIDES = [
   {
-    url: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=2000&q=80',
-    title: 'SECURE A PIECE OF TOMORROW\'S VALLEY',
-    subtitle: 'EXCLUSIVE SUNSET RANCHES',
-    tagline: 'Surrounded by pure natural reserves, ready with modern grid water and power hookups.'
+    url: '/banner1.png',
+    title: 'SECURE YOUR LAND NEAR UPCOMING INFRASTRUCTURE',
+    subtitle: 'MUMBAI 3.0 CONNECTIVITY',
+    tagline: 'Premium plots located near Navi Mumbai Airport and highways.'
   },
   {
-    url: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2000&q=80',
-    title: 'DISCOVER PREMIUM LAND FOR YOUR LEGACY',
-    subtitle: 'NATURE\'S LUXURY MEADOWS',
-    tagline: 'Pristine, secure, and appreciating acreage vetted for multi-generational wealth creation.'
+    url: '/banner2.png',
+    title: 'BUNGALOW, RESIDENTIAL & COMMERCIAL PLOTS',
+    subtitle: 'PREMIUM PLOT VARIETIES',
+    tagline: 'From luxury bungalow locations to high-yielding commercial lands, we provide clear-title plots tailored for growth.'
   },
   {
-    url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80',
-    title: 'EXQUISITE RETREATS & DEVELOPMENT PARCELS',
-    subtitle: 'MAJESTIC SUNLIT HILLS',
-    tagline: 'Direct road access, completely clear titles, and high investment yields in key growth zones.'
+    url: '/banner3.png',
+    title: 'CLEAR TITLE & COMPLETELY VERIFIED LAND PARCELS',
+    subtitle: '100% LEGAL TRANSPARENCY',
+    tagline: 'Every plot undergoes strict legal vetting with government clearances, offering you absolute peace of mind.'
   },
   {
-    url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=2000&q=80',
-    title: 'YOUR HEIRLOOM LANDHOLDING AWAITS',
-    subtitle: 'GOLDEN MOUNTAIN RIDGEWAYS',
-    tagline: 'Bespoke layouts starting from 1 to 50 acres with 360-degree high-elevation panoramic views.'
+    url: '/banner4.png',
+    title: 'INVEST IN THE BOOMING NAVI MUMBAI AIRPORT ZONE',
+    subtitle: 'FUTURE INVESTMENT SPOTLIGHT',
+    tagline: 'Maximize your wealth by securing premium plots in the high-growth Third Mumbai region before prices skyrocket.'
   }
 ];
 
@@ -160,11 +187,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj1',
     title: 'Highway Touch Commercial Land',
-    location: 'MUMBAI NH-48 CORRIDOR',
-    locationCategoryTag: 'MUMBAI',
+    location: 'MUMBAI 3.0',
+    locationCategoryTag: 'MUMBAI 3.0',
     size: '85,000 Sq.Ft.',
     price: '₹ 4.8 Crores',
     tag: 'Highway Touch',
+    zone: 'Commercial Land',
     image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=80',
     desc: 'Premium commercial frontage perfect for warehousing, fuel stations, or large corporate showrooms. Excellent 6-lane road touch.',
     amenities: ['Electricity', 'Road Access'],
@@ -173,11 +201,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj2',
     title: 'Residential NA Gated Plot',
-    location: 'PUNE OUTSKIRTS',
-    locationCategoryTag: 'PUNE',
+    location: 'PANVEL',
+    locationCategoryTag: 'PANVEL',
     size: '12,500 Sq.Ft.',
     price: '₹ 65 Lakhs',
     tag: 'Gated Villa Plot',
+    zone: 'Residential Plot',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80',
     desc: 'Fully sanctioned Collector NA villa plots with 100% legal titles. Premium clubhouse amenities, concrete internal roads & individual water connections.',
     amenities: ['Electricity', 'Road Access', 'Fencing', 'Water Supply'],
@@ -186,11 +215,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj3',
     title: 'Airport Perimeter Plot',
-    location: 'NAVI MUMBAI TRANSIT ZONE',
-    locationCategoryTag: 'NAVI MUMBAI',
+    location: 'MUMBAI 3.0',
+    locationCategoryTag: 'MUMBAI 3.0',
     size: '42,000 Sq.Ft.',
     price: '₹ 2.9 Crores',
     tag: 'Transit Hub',
+    zone: 'Residential Plot',
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
     desc: 'High-appreciation parcel located in the immediate vicinity of the proposed international airport. Ideal for cargo transit structures or corporate leasing.',
     amenities: ['Electricity', 'Road Access'],
@@ -198,25 +228,27 @@ const DEFAULT_PROJECTS = [
   },
   {
     id: 'proj4',
-    title: 'Sea-Facing Premium Block',
-    location: 'ALIBAUG COASTAL CORRIDOR',
-    locationCategoryTag: 'MUMBAI',
+    title: 'Scenic Pali Holiday Home Plot',
+    location: 'PALI',
+    locationCategoryTag: 'PALI',
     size: '35,000 Sq.Ft.',
     price: '₹ 5.5 Crores',
     tag: 'Sea Facing',
+    zone: 'Farmhouse Land',
     image: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1000&q=80',
-    desc: 'Luxury holiday parcel offering panoramic coastal views and private gate access. Ready with mature coconut palm plantations.',
+    desc: 'Luxury holiday parcel offering panoramic valley views and private gate access. Ready with mature coconut palm plantations.',
     amenities: ['Road Access', 'Fencing', 'Water Supply'],
     showOnHome: true
   },
   {
     id: 'proj5',
-    title: 'Ultra Luxury Valley Meadows',
-    location: 'PANCHGANI HILLSIDE',
-    locationCategoryTag: 'PUNE',
+    title: 'Commercial Warehousing Land',
+    location: 'PEN',
+    locationCategoryTag: 'PEN',
     size: '45,000 Sq.Ft.',
     price: '₹ 1.2 Crores',
     tag: 'Valley View',
+    zone: 'Commercial Land',
     image: 'https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?auto=format&fit=crop&w=1000&q=80',
     desc: 'Magnificent mountain-facing plot offering round-the-clock cool breezes. Includes finished perimeter stone walls and natural waterfall boundary.',
     amenities: ['Electricity', 'Road Access', 'Fencing', 'Water Supply'],
@@ -225,11 +257,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj6',
     title: 'Golden Oasis Agro Farmstead',
-    location: 'KHALAPUR GREEN VALLEY',
-    locationCategoryTag: 'FARMHOUSE PLOTS',
+    location: 'MANGAON',
+    locationCategoryTag: 'MANGAON',
     size: '90,000 Sq.Ft.',
     price: '₹ 1.9 Crores',
     tag: 'Agro Farms',
+    zone: 'Agricultural Land',
     image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1000&q=80',
     desc: 'Deep alluvial rich agricultural acreage. Comes with pre-installed drip irrigation systems, functional borewell, and organic farming assistance.',
     amenities: ['Electricity', 'Road Access', 'Water Supply'],
@@ -238,11 +271,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj7',
     title: 'High-Elevation Ridge Meadows',
-    location: 'LONAVALA RIDGE ZONE',
-    locationCategoryTag: 'PUNE',
+    location: 'KHOPOLI',
+    locationCategoryTag: 'KHOPOLI',
     size: '54,000 Sq.Ft.',
     price: '₹ 2.1 Crores',
     tag: 'Hill Station',
+    zone: 'Commercial Land',
     image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80',
     desc: 'Overlooking a scenic lake reservoir, this peak estate plot is perfectly secure, clear-demarcated, and ready for private retreat construction.',
     amenities: ['Electricity', 'Road Access', 'Fencing', 'Water Supply'],
@@ -251,11 +285,12 @@ const DEFAULT_PROJECTS = [
   {
     id: 'proj8',
     title: 'Sunset Ranch Country Meadows',
-    location: 'KARJAT VALLEY CORRIDOR',
-    locationCategoryTag: 'FARMHOUSE PLOTS',
+    location: 'KARJAT',
+    locationCategoryTag: 'KARJAT',
     size: '40,000 Sq.Ft.',
     price: '₹ 95 Lakhs',
     tag: 'Nature Centric',
+    zone: 'Farmhouse Land',
     image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80',
     desc: 'Slick riverfront ranch parcel ready for weekend holiday makers. Instant registry & 7/12 land records ready for transfer.',
     amenities: ['Electricity', 'Road Access', 'Water Supply'],
@@ -269,44 +304,6 @@ const getProjects = () => {
     if (saved) return JSON.parse(saved);
   } catch (e) {}
   return DEFAULT_PROJECTS;
-};
-
-const DEFAULT_NEWS = [
-  {
-    id: 'n1',
-    title: 'Parvat Reality Announces Upcoming Premium Navi Mumbai Land Launch',
-    date: 'June 28, 2026',
-    author: 'Sales Desk',
-    category: 'Land Launches',
-    snippet: 'Expanding our greenfield residential luxury landscape footprint with a fresh 40-acre premium project in the booming Navi Mumbai region.',
-    showOnHome: true
-  },
-  {
-    id: 'n2',
-    title: 'Land Appreciation Rates Soaring in Navi Mumbai Corridors',
-    date: 'June 15, 2026',
-    author: 'Economic Times (Repr.)',
-    category: 'Market Updates',
-    snippet: 'With the airport phase completion near, developers report record land inquiries for commercial and logistics plots.',
-    showOnHome: true
-  },
-  {
-    id: 'n3',
-    title: 'How Legal Vetting Is Transforming Land Purchases In West Region',
-    date: 'May 30, 2026',
-    author: 'Parvat Editorial',
-    category: 'Corporate News',
-    snippet: 'Clear-title verified certificates and transparent digital boundaries have become the absolute standard for premium investors.',
-    showOnHome: true
-  }
-];
-
-const getNews = () => {
-  try {
-    const saved = localStorage.getItem('parvat_news');
-    if (saved) return JSON.parse(saved);
-  } catch (e) {}
-  return DEFAULT_NEWS;
 };
 
 const DEFAULT_BANNERS = [
@@ -795,16 +792,89 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   );
 }
 
+const SAMPLE_NEWS = [];
+
 export default function App() {
+  const [allNews, setAllNews] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('parvat_news');
+      } catch (e) {}
+    }
+    return [];
+  });
+
+  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      // Check pathname first (e.g. /news/n1)
+      const path = window.location.pathname;
+      const pathParts = path.split('/');
+      const newsIndex = pathParts.findIndex(part => part.toLowerCase() === 'news');
+      if (newsIndex !== -1 && pathParts[newsIndex + 1]) {
+        return pathParts[newsIndex + 1];
+      }
+
+      // Check hash (e.g. #news-n1)
+      const hash = window.location.hash;
+      if (hash.startsWith('#news-')) {
+        return hash.replace('#news-', '');
+      }
+      if (hash.startsWith('#news/')) {
+        return hash.replace('#news/', '');
+      }
+    }
+    return null;
+  });
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState<any[]>(() => {
+    let loadedSlides = [...DEFAULT_SLIDES];
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem('parvat_slides');
-        if (saved) return JSON.parse(saved);
+        if (saved) {
+          loadedSlides = JSON.parse(saved);
+        }
       } catch (e) {}
     }
-    return DEFAULT_SLIDES;
+    // Force update all slides directly in code to ensure they are not stale from localStorage
+    if (loadedSlides && loadedSlides.length >= 4) {
+      loadedSlides[0] = {
+        ...loadedSlides[0],
+        url: '/banner1.png',
+        title: 'SECURE YOUR LAND NEAR UPCOMING INFRASTRUCTURE',
+        subtitle: 'MUMBAI 3.0 CONNECTIVITY',
+        tagline: 'Premium plots located near Navi Mumbai Airport and highways.'
+      };
+      loadedSlides[1] = {
+        ...loadedSlides[1],
+        url: '/banner2.png',
+        title: 'BUNGALOW, RESIDENTIAL & COMMERCIAL PLOTS',
+        subtitle: 'PREMIUM PLOT VARIETIES',
+        tagline: 'From luxury bungalow locations to high-yielding commercial lands, we provide clear-title plots tailored for growth.'
+      };
+      loadedSlides[2] = {
+        ...loadedSlides[2],
+        url: '/banner3.png',
+        title: 'CLEAR TITLE & COMPLETELY VERIFIED LAND PARCELS',
+        subtitle: '100% LEGAL TRANSPARENCY',
+        tagline: 'Every plot undergoes strict legal vetting with government clearances, offering you absolute peace of mind.'
+      };
+      loadedSlides[3] = {
+        ...loadedSlides[3],
+        url: '/banner4.png',
+        title: 'INVEST IN THE BOOMING NAVI MUMBAI AIRPORT ZONE',
+        subtitle: 'FUTURE INVESTMENT SPOTLIGHT',
+        tagline: 'Maximize your wealth by securing premium plots in the high-growth Third Mumbai region before prices skyrocket.'
+      };
+      // Keep localStorage in sync
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('parvat_slides', JSON.stringify(loadedSlides));
+        } catch (e) {}
+      }
+    }
+    return loadedSlides;
   });
   const [whatsappChannelUrl, setWhatsappChannelUrl] = useState<string>(() => {
     if (typeof window !== 'undefined') {
@@ -909,61 +979,38 @@ export default function App() {
   });
 
   // Hot Properties Tab filter state
-  const [activePropertyTab, setActivePropertyTab] = useState<string>('FARMHOUSE PLOTS');
+  const [activePropertyTab, setActivePropertyTab] = useState<string>('MUMBAI 3.0');
 
   // Selected Property Type Filter (for homepage and projects page)
   const [activeTypeTab, setActiveTypeTab] = useState<string>('ALL');
 
   // Helper to read property types from localStorage
   const getPropertyTypes = () => {
-    if (typeof window === 'undefined') return [];
-    const saved = localStorage.getItem('parvat_property_types');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {}
-    }
-    return [
+    const defaultTypes = [
       { id: 'type_1', name: 'Residential Plot', image: 'https://images.unsplash.com/photo-1524813686514-a57563d77965?auto=format&fit=crop&w=600&q=80' },
       { id: 'type_2', name: 'Commercial Land', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80' },
-      { id: 'type_3', name: 'Agricultural', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80' },
+      { id: 'type_3', name: 'Agricultural Land', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80' },
       { id: 'type_4', name: 'Farmhouse Land', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80' }
     ];
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('parvat_property_types', JSON.stringify(defaultTypes));
+      } catch (e) {}
+    }
+    return defaultTypes;
   };
 
   // Brochure download feedback state
   const [downloadingBrochure, setDownloadingBrochure] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
 
-  // Synchronize active property tab category with dynamically loaded project tags
+  // Synchronize active property tab category with our actual focus areas
   useEffect(() => {
-    const categories = Array.from(
-      new Set(
-        activeProjects
-          .filter((proj: any) => proj.showOnHome !== false)
-          .map((proj: any) => {
-            if (proj.locationCategoryTag) {
-              return proj.locationCategoryTag.trim().toUpperCase();
-            }
-            const locUpper = (proj.location || '').toUpperCase();
-            if (locUpper.includes('NAVI MUMBAI')) return 'NAVI MUMBAI';
-            if (locUpper.includes('MUMBAI')) return 'MUMBAI';
-            if (locUpper.includes('PUNE')) return 'PUNE';
-            if (locUpper.includes('KARJAT')) return 'FARMHOUSE PLOTS';
-            return 'FARMHOUSE PLOTS';
-          })
-          .filter(Boolean)
-      )
-    ) as string[];
-
-    if (categories.length > 0 && !categories.includes(activePropertyTab.toUpperCase())) {
-      const defaultTab = categories.includes('FARMHOUSE PLOTS') ? 'FARMHOUSE PLOTS' : categories[0];
-      setActivePropertyTab(defaultTab);
+    const categories = ['MUMBAI 3.0', 'PANVEL', 'PEN', 'PALI', 'MANGAON', 'KARJAT', 'KHOPOLI'];
+    if (!categories.includes(activePropertyTab.toUpperCase())) {
+      setActivePropertyTab('MUMBAI 3.0');
     }
-  }, [activeProjects, activePropertyTab]);
+  }, [activePropertyTab]);
 
   // Sync WhatsApp Channel URL and other dynamic News configs on active page/view change
   useEffect(() => {
@@ -1047,6 +1094,18 @@ export default function App() {
           }
         }
 
+        // Override if we are viewing a specific news article for fully dynamic SEO
+        if (activePage === 'news' && selectedNewsId) {
+          const article = allNews.find((n: any) => n.id === selectedNewsId);
+          if (article) {
+            currentSeo = {
+              title: `${article.title} | Parvat Reality News`,
+              description: article.snippet || `Read the latest update: ${article.title} on Parvat Reality.`,
+              keywords: `parvat news, ${article.category || 'real estate'}, ${article.title.toLowerCase().split(' ').slice(0, 5).join(', ')}`
+            };
+          }
+        }
+
         // Inject dynamic title
         document.title = currentSeo.title;
 
@@ -1067,13 +1126,43 @@ export default function App() {
           document.head.appendChild(metaKeywords);
         }
         metaKeywords.setAttribute('content', currentSeo.keywords);
+
+        // Inject Dynamic OpenGraph tags for rich SEO crawling
+        const ogTags = [
+          { property: 'og:title', content: currentSeo.title },
+          { property: 'og:description', content: currentSeo.description },
+          { property: 'og:url', content: window.location.href },
+          { property: 'og:type', content: activePage === 'news' && selectedNewsId ? 'article' : 'website' }
+        ];
+
+        // Find or create article details if applicable
+        if (activePage === 'news' && selectedNewsId) {
+          const article = allNews.find((n: any) => n.id === selectedNewsId);
+          if (article && article.media && article.media.length > 0) {
+            ogTags.push({ property: 'og:image', content: article.media[0].data });
+          } else {
+            ogTags.push({ property: 'og:image', content: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80' });
+          }
+        } else {
+          ogTags.push({ property: 'og:image', content: 'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80' });
+        }
+
+        ogTags.forEach(tag => {
+          let element = document.querySelector(`meta[property="${tag.property}"]`);
+          if (!element) {
+            element = document.createElement('meta');
+            element.setAttribute('property', tag.property);
+            document.head.appendChild(element);
+          }
+          element.setAttribute('content', tag.content);
+        });
+
       } catch (e) {
         console.error("SEO synchronization failed:", e);
       }
     }
-  }, [activePage]);
+  }, [activePage, selectedNewsId, allNews]);
 
-  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
   const [newsSearchQuery, setNewsSearchQuery] = useState('');
   const [selectedNewsCategory, setSelectedNewsCategory] = useState('All');
   const [newsSliderIndex, setNewsSliderIndex] = useState(0);
@@ -1150,6 +1239,18 @@ export default function App() {
       setNewsHeroText(text || 'Expanding our greenfield residential luxury landscape footprint across India.');
       setNewsHeroImage(image);
 
+      // Sync News
+      try {
+        const savedNews = localStorage.getItem('parvat_news');
+        if (savedNews) {
+          setAllNews(JSON.parse(savedNews));
+        } else {
+          setAllNews([]);
+        }
+      } catch (e) {
+        setAllNews([]);
+      }
+
       // Sync Active Projects
       try {
         const savedProjects = localStorage.getItem('parvat_projects');
@@ -1197,56 +1298,120 @@ export default function App() {
     }
   }, [newsCategories, selectedNewsCategory]);
 
-  // Navigate function
+  // Navigate function with dynamic routing using pushState and hash fallback
   const navigateTo = (page: string, id?: string) => {
     setActivePage(page);
     if (page === 'news') {
       setSelectedNewsId(id || null);
       setSelectedProjectId(null);
+      const cleanPath = id ? `/news/${id}` : '/news';
+      window.history.pushState({ page, id }, '', cleanPath);
     } else if (page === 'property') {
       setSelectedProjectId(id || null);
       if (id) {
         localStorage.setItem('parvat_selected_project_id', id);
       }
+      const cleanPath = id ? `/property/${id}` : '/property';
+      window.history.pushState({ page, id }, '', cleanPath);
     } else {
       setSelectedProjectId(null);
+      setSelectedNewsId(null);
+      const cleanPath = page === 'home' ? '/' : `/${page}`;
+      window.history.pushState({ page }, '', cleanPath);
     }
     setMobileMenuOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    window.location.hash = page === 'home' ? '' : (page === 'property' && id ? `#property-${id}` : `#${page}`);
   };
 
-  // Listen to hash change
+  // Listen to popstate and hash change for clean browser navigation
   useEffect(() => {
-    const handleHashChange = () => {
-      const rawHash = window.location.hash.replace('#', '');
-      if (rawHash) {
-        if (rawHash.startsWith('property-')) {
-          const id = rawHash.replace('property-', '');
-          setSelectedProjectId(id);
-          setActivePage('property');
-        } else {
-          setActivePage(rawHash);
-          setSelectedProjectId(null);
-        }
-      } else {
-        setActivePage('home');
+    const handleNavigation = () => {
+      const path = window.location.pathname.toLowerCase();
+      const pathParts = window.location.pathname.split('/');
+      
+      const newsIndex = pathParts.findIndex(part => part.toLowerCase() === 'news');
+      const propertyIndex = pathParts.findIndex(part => part.toLowerCase() === 'property');
+
+      if (newsIndex !== -1 && pathParts[newsIndex + 1]) {
+        setActivePage('news');
+        setSelectedNewsId(pathParts[newsIndex + 1]);
         setSelectedProjectId(null);
+      } else if (propertyIndex !== -1 && pathParts[propertyIndex + 1]) {
+        setActivePage('property');
+        setSelectedProjectId(pathParts[propertyIndex + 1]);
+        setSelectedNewsId(null);
+      } else if (path.includes('projects')) {
+        setActivePage('projects');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else if (path.includes('news')) {
+        setActivePage('news');
+        setSelectedNewsId(null);
+        setSelectedProjectId(null);
+      } else if (path.includes('about')) {
+        setActivePage('about');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else if (path.includes('journey')) {
+        setActivePage('journey');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else if (path.includes('contact')) {
+        setActivePage('contact');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else if (path.includes('login')) {
+        setActivePage('login');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else if (path.includes('enquire')) {
+        setActivePage('enquire');
+        setSelectedProjectId(null);
+        setSelectedNewsId(null);
+      } else {
+        // Fallback to hash
+        const rawHash = window.location.hash.replace('#', '');
+        if (rawHash) {
+          if (rawHash.startsWith('property-')) {
+            const id = rawHash.replace('property-', '');
+            setSelectedProjectId(id);
+            setActivePage('property');
+            setSelectedNewsId(null);
+          } else if (rawHash.startsWith('news-')) {
+            const id = rawHash.replace('news-', '');
+            setSelectedNewsId(id);
+            setActivePage('news');
+            setSelectedProjectId(null);
+          } else {
+            setActivePage(rawHash);
+            setSelectedProjectId(null);
+            setSelectedNewsId(null);
+          }
+        } else {
+          setActivePage('home');
+          setSelectedProjectId(null);
+          setSelectedNewsId(null);
+        }
       }
     };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+
+    window.addEventListener('popstate', handleNavigation);
+    window.addEventListener('hashchange', handleNavigation);
+    return () => {
+      window.removeEventListener('popstate', handleNavigation);
+      window.removeEventListener('hashchange', handleNavigation);
+    };
   }, []);
 
   // Automated News Hero Slider
   useEffect(() => {
-    const latestNews = getNews().slice(0, 3);
+    const latestNews = allNews.slice(0, 3);
     if (activePage !== 'news' || selectedNewsId || latestNews.length === 0) return;
     const interval = setInterval(() => {
       setNewsSliderIndex((prev) => (prev + 1) % latestNews.length);
     }, 5000);
     return () => clearInterval(interval);
-  }, [activePage, selectedNewsId]);
+  }, [activePage, selectedNewsId, allNews]);
 
   // Intercept all page link clicks to handle in-app transition
   useEffect(() => {
@@ -1530,7 +1695,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 font-sans antialiased text-neutral-200">
+    <div className="min-h-screen w-full overflow-x-hidden bg-neutral-950 font-sans antialiased text-neutral-200">
       
       {/* FIXED NAVBAR */}
       <nav id="main-navbar" className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300">
@@ -1612,12 +1777,6 @@ export default function App() {
                 }`}
               >
                 CONTACT
-              </a>
-              <a 
-                href="/admin.html" 
-                className="text-xs xl:text-sm font-semibold tracking-widest pb-1 transition-all duration-200 text-slate-600 hover:text-blue-600 hover:border-b-2 hover:border-blue-600/50"
-              >
-                ADMIN
               </a>
               <a 
                 href="/login" 
@@ -1707,30 +1866,11 @@ export default function App() {
               CONTACT
             </a>
             <a 
-              href="/admin.html" 
-              className="block px-3 py-2 rounded text-base font-medium tracking-wide transition-all text-slate-600 hover:text-blue-600 hover:bg-slate-50"
-            >
-              ADMIN
-            </a>
-            <a 
               href="/login" 
               className="block px-3 py-2 rounded text-base font-medium tracking-wide transition-all text-slate-600 hover:text-blue-600 hover:bg-slate-50"
             >
               LOGIN
             </a>
-            
-            <div className="pt-2">
-              <button 
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setIsEnquireOpen(true);
-                }}
-                className="w-full flex items-center justify-center gap-2 bg-neutral-900 border border-amber-500/30 text-amber-400 py-3 rounded text-sm font-semibold tracking-wider hover:bg-neutral-800"
-              >
-                REQUEST CALLBACK
-                <Phone className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         )}
       </nav>
@@ -2023,34 +2163,17 @@ export default function App() {
 
           {/* Interactive Location Tabs */}
           {(() => {
-            const categories = Array.from(
-              new Set(
-                activeProjects
-                  .filter((proj: any) => proj.showOnHome !== false)
-                  .map((proj: any) => {
-                    if (proj.locationCategoryTag) {
-                      return proj.locationCategoryTag.trim().toUpperCase();
-                    }
-                    const locUpper = (proj.location || '').toUpperCase();
-                    if (locUpper.includes('NAVI MUMBAI')) return 'NAVI MUMBAI';
-                    if (locUpper.includes('MUMBAI')) return 'MUMBAI';
-                    if (locUpper.includes('PUNE')) return 'PUNE';
-                    if (locUpper.includes('KARJAT')) return 'FARMHOUSE PLOTS';
-                    return 'FARMHOUSE PLOTS';
-                  })
-                  .filter(Boolean)
-              )
-            ) as string[];
+            const categories = ['Mumbai 3.0', 'Panvel', 'Pen', 'Pali', 'Mangaon', 'Karjat', 'Khopoli'];
 
             return (
               <div className="flex flex-col gap-6 mb-12">
                 <div className="flex flex-row md:flex-wrap overflow-x-auto md:overflow-x-visible whitespace-nowrap md:whitespace-normal scrollbar-none snap-x gap-2 md:gap-3 md:justify-center md:items-center pb-2 md:pb-0 px-4 md:px-0">
                   {categories.map((tab) => {
-                    const isActive = activePropertyTab.toUpperCase() === tab;
+                    const isActive = activePropertyTab.toUpperCase() === tab.toUpperCase();
                     return (
                       <button
                         key={tab}
-                        onClick={() => setActivePropertyTab(tab)}
+                        onClick={() => setActivePropertyTab(tab.toUpperCase())}
                         className={`snap-center px-4 py-2 md:px-6 md:py-3 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
                           isActive 
                             ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105 font-bold'
@@ -2173,17 +2296,17 @@ export default function App() {
 
                     {/* Amenities Row */}
                     {property.amenities && property.amenities.length > 0 && (
-                      <div className="space-y-1 pt-2 border-t border-neutral-800/60">
-                        <div className="text-[8px] sm:text-[9px] font-bold text-neutral-500 uppercase tracking-widest">Available Amenities</div>
-                        <div className="flex flex-wrap gap-1">
+                      <div className="space-y-1.5 pt-2 border-t border-neutral-800/60">
+                        <div className="text-[8px] sm:text-[9px] font-bold text-neutral-400 uppercase tracking-widest">Available Amenities</div>
+                        <div className="flex flex-wrap gap-1.5">
                           {property.amenities.map((amenity: string) => {
-                            let Icon = Compass;
-                            if (amenity === 'Electricity') Icon = Zap;
-                            if (amenity === 'Water Supply') Icon = Droplet;
-                            if (amenity === 'Fencing') Icon = Shield;
+                            const { Icon, bgClass, iconColor } = getAmenityDetails(amenity);
                             return (
-                              <span key={amenity} className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-neutral-950/60 border border-neutral-800/80 text-[8px] sm:text-[9px] font-medium text-neutral-300">
-                                <Icon className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-amber-500" />
+                              <span 
+                                key={amenity} 
+                                className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[8px] sm:text-[10px] font-bold tracking-wide transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.15)] ${bgClass}`}
+                              >
+                                <Icon className={`w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 ${iconColor}`} />
                                 {amenity}
                               </span>
                             );
@@ -2324,78 +2447,84 @@ export default function App() {
               <div className="w-12 h-0.5 bg-amber-500 mx-auto mt-2"></div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-8">
-              {getNews().filter((item: any) => item.status !== 'draft' && item.showOnHome !== false).map((item, index) => (
-                <div 
-                  key={item.id}
-                  onClick={() => navigateTo('news', item.id)}
-                  style={{ animationDelay: `${index * 120}ms` }}
-                  className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
-                >
-                  {item.media && item.media.length > 0 ? (
-                    <div className="relative h-24 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
-                      {item.media.map((m: any, idx: number) => (
-                        <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                          {m.type.startsWith('video/') ? (
-                             <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
-                          ) : (
-                             <img src={m.data} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                          )}
-                        </div>
-                      ))}
-                      {item.media.length > 1 && (
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
-                           {item.media.map((_: any, idx: number) => (
-                              <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
-                           ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : item.image ? (
-                    <div className="relative h-24 sm:h-48 w-full overflow-hidden">
-                      <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                      {item.videoLink && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all">
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
-                            <Play className="w-3 h-3 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
+            {allNews.filter((item: any) => item.status !== 'draft' && item.showOnHome !== false).length === 0 ? (
+              <div className="col-span-full text-center py-12 px-4 border border-dashed border-neutral-800 rounded-xl bg-neutral-900/10">
+                <p className="text-neutral-500 text-sm font-light">No announcements or news articles are currently published. Stay tuned for upcoming updates.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-8">
+                {allNews.filter((item: any) => item.status !== 'draft' && item.showOnHome !== false).map((item, index) => (
+                  <div 
+                    key={item.id}
+                    onClick={() => navigateTo('news', item.id)}
+                    style={{ animationDelay: `${index * 120}ms` }}
+                    className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
+                  >
+                    {item.media && item.media.length > 0 ? (
+                      <div className="relative h-24 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
+                        {item.media.map((m: any, idx: number) => (
+                          <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
+                            {m.type.startsWith('video/') ? (
+                               <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
+                            ) : (
+                               <img src={m.data} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                            )}
                           </div>
-                        </div>
-                      )}
+                        ))}
+                        {item.media.length > 1 && (
+                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
+                             {item.media.map((_: any, idx: number) => (
+                                <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
+                             ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : item.image ? (
+                      <div className="relative h-24 sm:h-48 w-full overflow-hidden">
+                        <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                        {item.videoLink && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all">
+                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
+                              <Play className="w-3 h-3 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                    <div className="p-2 sm:p-6 space-y-2 sm:space-y-4 flex-1">
+                      <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-neutral-500">
+                        <span>{item.date}</span>
+                        <span className="text-amber-500/80 uppercase truncate max-w-[50px] sm:max-w-none">{item.author}</span>
+                      </div>
+                      <h4 className="text-xs sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-1 sm:line-clamp-none">
+                        {item.title}
+                      </h4>
+                      <p className="text-neutral-400 text-[10px] sm:text-xs font-light leading-relaxed line-clamp-2 sm:line-clamp-none">
+                        {item.snippet}
+                      </p>
                     </div>
-                  ) : null}
-                  <div className="p-2 sm:p-6 space-y-2 sm:space-y-4 flex-1">
-                    <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-neutral-500">
-                      <span>{item.date}</span>
-                      <span className="text-amber-500/80 uppercase truncate max-w-[50px] sm:max-w-none">{item.author}</span>
+                    <div className="p-2 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
+                      <span className="text-[8px] sm:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
+                      <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); }} 
+                          className="text-neutral-500 hover:text-amber-500 transition-colors p-1" 
+                          title="Share" 
+                          aria-label="Share"
+                        >
+                          <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                        </button>
+                        <span 
+                          className="text-[9px] sm:text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-0.5 sm:gap-1"
+                        >
+                          Read &rarr;
+                        </span>
+                      </div>
                     </div>
-                    <h4 className="text-xs sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-1 sm:line-clamp-none">
-                      {item.title}
-                    </h4>
-                    <p className="text-neutral-400 text-[10px] sm:text-xs font-light leading-relaxed line-clamp-2 sm:line-clamp-none">
-                      {item.snippet}
-                    </p>
                   </div>
-                  <div className="p-2 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-                    <span className="text-[8px] sm:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
-                    <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); }} 
-                        className="text-neutral-500 hover:text-amber-500 transition-colors p-1" 
-                        title="Share" 
-                        aria-label="Share"
-                      >
-                        <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </button>
-                      <span 
-                        className="text-[9px] sm:text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-0.5 sm:gap-1"
-                      >
-                        Read &rarr;
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
 
         </div>
@@ -2492,34 +2621,17 @@ export default function App() {
 
             {/* Dynamic Location Filter Tabs */}
             {(() => {
-              const categories = Array.from(
-                new Set(
-                  activeProjects
-                    .filter((proj: any) => proj.showOnHome !== false)
-                    .map((proj: any) => {
-                      if (proj.locationCategoryTag) {
-                        return proj.locationCategoryTag.trim().toUpperCase();
-                      }
-                      const locUpper = (proj.location || '').toUpperCase();
-                      if (locUpper.includes('NAVI MUMBAI')) return 'NAVI MUMBAI';
-                      if (locUpper.includes('MUMBAI')) return 'MUMBAI';
-                      if (locUpper.includes('PUNE')) return 'PUNE';
-                      if (locUpper.includes('KARJAT')) return 'FARMHOUSE PLOTS';
-                      return 'FARMHOUSE PLOTS';
-                    })
-                    .filter(Boolean)
-                )
-              ) as string[];
+              const categories = ['Mumbai 3.0', 'Panvel', 'Pen', 'Pali', 'Mangaon', 'Karjat', 'Khopoli'];
 
               return (
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-row md:flex-wrap overflow-x-auto md:overflow-x-visible whitespace-nowrap md:whitespace-normal scrollbar-none snap-x gap-2 md:gap-3 md:justify-center md:items-center pb-2 md:pb-0 px-4 md:px-0">
                     {categories.map((tab) => {
-                      const isActive = activePropertyTab.toUpperCase() === tab;
+                      const isActive = activePropertyTab.toUpperCase() === tab.toUpperCase();
                       return (
                         <button
                           key={tab}
-                          onClick={() => setActivePropertyTab(tab)}
+                          onClick={() => setActivePropertyTab(tab.toUpperCase())}
                           className={`snap-center px-4 py-2 md:px-6 md:py-3 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
                             isActive 
                               ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105 font-bold'
@@ -2632,16 +2744,16 @@ export default function App() {
                       {/* Amenities Row */}
                       {proj.amenities && proj.amenities.length > 0 && (
                         <div className="space-y-1 sm:space-y-1.5 pt-1.5 sm:pt-3 border-t border-neutral-800/60">
-                          <div className="text-[8px] sm:text-[9px] font-bold text-neutral-500 uppercase tracking-widest">Available Amenities</div>
-                          <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                          <div className="text-[8px] sm:text-[9px] font-bold text-neutral-400 uppercase tracking-widest">Available Amenities</div>
+                          <div className="flex flex-wrap gap-1.5 sm:gap-2">
                             {proj.amenities.map((amenity: string) => {
-                              let Icon = Compass;
-                              if (amenity === 'Electricity') Icon = Zap;
-                              if (amenity === 'Water Supply') Icon = Droplet;
-                              if (amenity === 'Fencing') Icon = Shield;
+                              const { Icon, bgClass, iconColor } = getAmenityDetails(amenity);
                               return (
-                                <span key={amenity} className="inline-flex items-center gap-1 px-1 sm:px-2 py-0.5 rounded bg-neutral-950/60 border border-neutral-800/80 text-[8px] sm:text-[9px] font-medium text-neutral-300">
-                                  <Icon className="w-2 sm:w-2.5 h-2 sm:h-2.5 text-amber-500" />
+                                <span 
+                                  key={amenity} 
+                                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[8px] sm:text-[10px] font-bold tracking-wide transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.15)] ${bgClass}`}
+                                >
+                                  <Icon className={`w-2.5 sm:w-3.5 h-2.5 sm:h-3.5 ${iconColor}`} />
                                   {amenity}
                                 </span>
                               );
@@ -2900,17 +3012,16 @@ export default function App() {
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <span className="text-amber-500 text-xs font-bold tracking-[0.3em] uppercase block animate-fadeIn">WHO WE ARE</span>
               <h1 className="text-4xl md:text-5xl font-serif font-bold text-white tracking-wide">
-                ABOUT PARVAT REALITY &amp; DEVELOPERS
+                ABOUT PARVAT REALITY
               </h1>
               <p className="text-neutral-400 text-sm md:text-base font-light leading-relaxed">
-                The New Address of Progress
+                A Trustworthy Developer Built on Transparency, Vision &amp; Growth
               </p>
               <div className="w-24 h-0.5 bg-gradient-to-r from-amber-500 to-amber-600 mx-auto mt-6" />
             </div>
 
-            {/* Corporate Story: 2-Column Section */}
+            {/* Section 1: About Company */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              
               {/* Left Side: Modern Development/Office Image */}
               <div className="lg:col-span-5 relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-1000" />
@@ -2931,93 +3042,165 @@ export default function App() {
 
               {/* Right Side: Elaborate Corporate Story */}
               <div className="lg:col-span-7 space-y-6 text-neutral-300">
-                <h3 className="text-2xl font-serif font-bold text-white tracking-wide">
-                  Crafting Premium Real Estate Infrastructure with Legal Perfection
+                <span className="px-3 py-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase inline-block">
+                  TRUSTED DEVELOPER
+                </span>
+                <h3 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
+                  Pioneering Land Innovations in Maharashtra's Booming Zones
                 </h3>
                 
                 <p className="text-sm md:text-base font-light leading-relaxed">
-                  Established with a vision to redefine land acquisitions and sustainable infrastructure in Western India, Parvat Reality has consolidated over <span className="text-amber-400 font-semibold">1,200 acres</span> of prime agricultural, non-agricultural (NA), and strategic industrial land holdings.
+                  Parvat Reality is a highly trustworthy real estate developer specializing in high-growth, strategic plot developments across <span className="text-amber-400 font-semibold">Mumbai 3.0, Pen, and Pali</span>. We acquire and develop clean-title, premium land parcels located immediately near major upcoming megastructure networks.
                 </p>
 
                 <p className="text-sm md:text-base font-light leading-relaxed">
-                  Our core philosophy centers on <span className="text-white font-semibold">absolute title protection</span>, meticulous modern boundary demarcation, and providing plug-and-play development readiness. Each parcel represents a pristine asset vetted by senior legal authorities and financial counselors to guarantee zero encumbrances.
+                  Our portfolio is selectively situated to benefit from monumental infrastructure projects such as the new <span className="text-white font-semibold">Navi Mumbai International Airport</span>, the record-breaking <span className="text-white font-semibold">Mumbai Trans Harbour Link (MTHL)</span>, and expanding high-speed <span className="text-white font-semibold">Metro lines</span>. This places your investments right in the path of unparalleled growth and commercial advancement.
                 </p>
 
-                <p className="text-sm md:text-base font-light leading-relaxed">
-                  By matching deep local insights with state-of-the-art clear-title digital registries, we ensure our high-net-worth investors and first-time plot buyers experience smooth registrations and immediate ownership transfer.
-                </p>
-
-                <div className="pt-4 border-l-2 border-amber-500 pl-4 italic text-amber-400/90 font-serif text-base">
-                  "We do not merely trade in land boundaries; we deliver the secure, appreciating foundational ground upon which family wealth is constructed."
+                <div className="pt-2 border-l-2 border-amber-500 pl-4 italic text-amber-400/90 font-serif text-sm md:text-base">
+                  "We specialize in providing high-growth, fully demarcated land options backed by 100% legal title protection to establish lifelong, secure family wealth."
                 </div>
               </div>
-
             </div>
 
-            {/* Core Values 3-Column Grid */}
+            {/* Section 2: Plots We Have (Grid Layout) */}
             <div className="space-y-10 pt-12 border-t border-neutral-900">
               <div className="text-center space-y-2">
-                <span className="text-amber-500 text-xs font-bold tracking-widest uppercase block">OUR PILLARS</span>
-                <h2 className="text-3xl font-serif font-bold text-white tracking-wide">CORE CORPORATE VALUES</h2>
+                <span className="text-amber-500 text-xs font-bold tracking-[0.2em] uppercase block">DIVERSE HOLDINGS</span>
+                <h2 className="text-3xl font-serif font-bold text-white tracking-wide">PLOTS WE HAVE</h2>
+                <p className="text-neutral-400 text-xs md:text-sm max-w-xl mx-auto font-light">
+                  A premium, carefully categorized collection of clean-title land options tailored to every requirement.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                
-                {/* Value 1 */}
-                <div className="bg-neutral-900/60 border border-neutral-900 rounded-2xl p-8 space-y-4 hover:border-amber-500/30 transition-all duration-300">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                    <Compass className="w-6 h-6" />
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {[
+                  { title: "Bungalow Plots", bg: "from-amber-500/10 to-transparent", hoverBorder: "hover:border-amber-500/40", icon: "🏡" },
+                  { title: "Investment Plots", bg: "from-blue-500/10 to-transparent", hoverBorder: "hover:border-blue-500/40", icon: "📈" },
+                  { title: "Warehouse Plots", bg: "from-emerald-500/10 to-transparent", hoverBorder: "hover:border-emerald-500/40", icon: "🏭" },
+                  { title: "Farmhouse Plots", bg: "from-teal-500/10 to-transparent", hoverBorder: "hover:border-teal-500/40", icon: "🌳" },
+                  { title: "Residential Plots", bg: "from-purple-500/10 to-transparent", hoverBorder: "hover:border-purple-500/40", icon: "🏢" },
+                  { title: "Commercial Plots", bg: "from-indigo-500/10 to-transparent", hoverBorder: "hover:border-indigo-500/40", icon: "🏬" },
+                  { title: "Agriculture Plots", bg: "from-orange-500/10 to-transparent", hoverBorder: "hover:border-orange-500/40", icon: "🌾" }
+                ].map((item, idx) => (
+                  <div 
+                    key={idx}
+                    className={`relative overflow-hidden rounded-2xl bg-gradient-to-b ${item.bg} bg-neutral-900 border border-neutral-800/80 p-5 flex flex-col items-center justify-center text-center hover:scale-105 ${item.hoverBorder} transition-all duration-300 group shadow-md`}
+                  >
+                    <div className="space-y-3">
+                      <div className="w-12 h-12 rounded-full bg-neutral-800/80 flex items-center justify-center text-2xl shadow-inner mx-auto group-hover:scale-110 transition-transform duration-300">
+                        {item.icon}
+                      </div>
+                      <h4 className="text-white font-serif font-bold text-xs md:text-sm leading-tight tracking-wide group-hover:text-amber-400 transition-colors">
+                        {item.title}
+                      </h4>
+                    </div>
                   </div>
-                  <h3 className="text-lg font-serif font-bold text-white tracking-wide">Ultimate Transparency</h3>
-                  <p className="text-neutral-400 text-xs md:text-sm font-light leading-relaxed">
-                    We offer absolute clarity with online land tracking, clear-cut pricing indexes, and straightforward documentation. Every single dimension is digitally measured and open for customer audit.
-                  </p>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Value 2 */}
-                <div className="bg-neutral-900/60 border border-neutral-900 rounded-2xl p-8 space-y-4 hover:border-amber-500/30 transition-all duration-300">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                    <FileCheck2 className="w-6 h-6" />
+            {/* Section 3: Core Locations */}
+            <div className="space-y-10 pt-12 border-t border-neutral-900">
+              <div className="text-center space-y-2">
+                <span className="text-amber-500 text-xs font-bold tracking-[0.2em] uppercase block">GEOGRAPHIC CORRIDORS</span>
+                <h2 className="text-3xl font-serif font-bold text-white tracking-wide">OUR CORE LOCATIONS</h2>
+                <p className="text-neutral-400 text-xs md:text-sm max-w-xl mx-auto font-light">
+                  We focus our expert acquisitions in high-potential, heavily integrated infrastructure hubs across Maharashtra.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                {[
+                  { name: "Mumbai 3.0", highlight: "Prime Corridor", connectivity: "MTHL & Metro Touch" },
+                  { name: "Panvel", highlight: "Airport Gateway", connectivity: "Transit-Oriented" },
+                  { name: "Pen", highlight: "Logistics Node", connectivity: "Highway Proximity" },
+                  { name: "Pali", highlight: "Scenic Estates", connectivity: "Excellent State Highway" },
+                  { name: "Mangaon", highlight: "Industrial Belt", connectivity: "Key Railway Access" },
+                  { name: "Karjat", highlight: "Luxury Escapes", connectivity: "Rapid Rail Connect" },
+                  { name: "Khopoli", highlight: "Commercial Hub", connectivity: "Expressway Frontage" },
+                ].map((loc, idx) => (
+                  <div 
+                    key={idx}
+                    className="relative rounded-2xl bg-neutral-900/40 border border-neutral-800/60 p-4 space-y-3 hover:border-amber-500/20 transition-all duration-300 hover:bg-neutral-900/70 text-center group"
+                  >
+                    <div className="flex items-center justify-center text-amber-500 mx-auto">
+                      <MapPin className="w-4 h-4 text-amber-500 shrink-0" />
+                    </div>
+                    <div className="space-y-1">
+                      <h4 className="text-white font-serif font-bold text-sm tracking-wide group-hover:text-amber-400 transition-colors">
+                        {loc.name}
+                      </h4>
+                      <p className="text-neutral-400 text-[11px] font-medium font-sans">
+                        {loc.highlight}
+                      </p>
+                    </div>
+                    <div className="pt-2 border-t border-neutral-800/80 text-[9px] text-neutral-500 font-mono tracking-tight leading-relaxed">
+                      {loc.connectivity}
+                    </div>
                   </div>
-                  <h3 className="text-lg font-serif font-bold text-white tracking-wide">Legal Verification</h3>
-                  <p className="text-neutral-400 text-xs md:text-sm font-light leading-relaxed">
-                    All our land plots undergo complete title search vetting spanning 30 years by elite panel advocates. Direct 7/12 land records are transferred directly to your name with zero lag.
-                  </p>
-                </div>
+                ))}
+              </div>
+            </div>
 
-                {/* Value 3 */}
-                <div className="bg-neutral-900/60 border border-neutral-900 rounded-2xl p-8 space-y-4 hover:border-amber-500/30 transition-all duration-300">
-                  <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
-                    <Building2 className="w-6 h-6" />
+            {/* Section 4: Property Exchange Offer Highlight Banner */}
+            <div className="relative rounded-3xl overflow-hidden bg-white border border-slate-200 p-8 md:p-12 shadow-[0_15px_40px_rgba(0,0,0,0.04)]">
+              <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="relative grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                <div className="lg:col-span-8 space-y-4">
+                  <span className="px-3 py-1 bg-amber-500/10 text-amber-700 border border-amber-500/25 rounded-full text-[10px] font-mono font-bold tracking-widest uppercase inline-block">
+                    LIMITED TIME PROPERTY EXCHANGE OFFER
+                  </span>
+                  <h3 className="text-2xl md:text-3xl font-serif font-extrabold text-slate-900 tracking-wide leading-tight uppercase">
+                    Trade Existing Property for Premium Land
+                  </h3>
+                  <p className="text-slate-700 text-sm md:text-base font-light leading-relaxed max-w-2xl">
+                    Unlock capital from stagnant assets! Trade <span className="text-slate-900 font-semibold">any existing property in Maharashtra</span> for an appreciating, premium clear-title plot in the booming, highly-coveted <span className="text-amber-600 font-semibold">Sea Link Mahamumbai area</span>.
+                  </p>
+                  <div className="flex flex-wrap gap-6 pt-2 text-xs font-mono text-slate-600">
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Commercial properties welcome</span>
+                    <span className="flex items-center gap-1.5"><CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" /> Transparent direct-value adjustments</span>
                   </div>
-                  <h3 className="text-lg font-serif font-bold text-white tracking-wide">Future-Focused Growth</h3>
-                  <p className="text-neutral-400 text-xs md:text-sm font-light leading-relaxed">
-                    We acquire high-potential pockets bordering industrial clusters, highway nodes, and proposed transit corridors. This guarantees exceptional capital gains over subsequent years.
-                  </p>
                 </div>
-
+                <div className="lg:col-span-4 text-left lg:text-right">
+                  <button 
+                    onClick={() => setIsAppointmentOpen(true)}
+                    className="w-full lg:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 bg-amber-500 hover:bg-slate-900 text-neutral-950 hover:text-white font-bold text-xs tracking-widest uppercase rounded-lg transition-all duration-300 shadow-[0_4px_15px_rgba(245,158,11,0.25)] hover:shadow-[0_4px_20px_rgba(15,23,42,0.2)] cursor-pointer"
+                  >
+                    APPLY FOR EXCHANGE VALUE AUDIT
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* High-End Call To Action Section */}
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-neutral-900 to-neutral-900/90 border border-neutral-800 p-8 md:p-12 text-center space-y-6 max-w-4xl mx-auto shadow-2xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.08),transparent_50%)]" />
-              <div className="relative space-y-3">
-                <span className="text-amber-500 text-xs font-bold tracking-[0.2em] uppercase block">PREMIUM CONSULTATION</span>
-                <h3 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
+            <div className="relative rounded-3xl overflow-hidden bg-white border border-slate-200 p-10 md:p-16 text-center space-y-8 max-w-4xl mx-auto shadow-[0_20px_50px_rgba(0,0,0,0.05)]">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.05),transparent_50%)]" />
+              
+              <div className="relative space-y-4">
+                <span className="text-amber-600 text-xs font-bold tracking-[0.25em] uppercase px-3 py-1 bg-amber-500/10 rounded-full border border-amber-500/25 inline-block font-mono">
+                  PREMIUM CONSULTATION
+                </span>
+                <h3 className="text-2xl md:text-4xl font-serif font-extrabold text-slate-800 tracking-wide leading-tight">
                   Ready to secure your strategic land asset?
                 </h3>
-                <p className="text-neutral-400 text-xs md:text-sm max-w-xl mx-auto leading-relaxed">
+                <p className="text-slate-600 text-sm md:text-base max-w-2xl mx-auto leading-relaxed font-light">
                   Coordinate a private site tour with our relationship desks, complete with luxury chauffeured transit options from major urban hubs.
                 </p>
               </div>
 
-              <div className="relative pt-2">
+              <div className="relative pt-4">
                 <button 
                   onClick={() => setIsAppointmentOpen(true)}
-                  className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs md:text-sm tracking-widest uppercase rounded-lg transition-all duration-300 shadow-lg cursor-pointer"
+                  className="relative inline-flex items-center justify-center gap-2.5 px-8 py-4 bg-amber-500 hover:bg-slate-900 text-neutral-950 hover:text-white font-extrabold text-xs md:text-sm tracking-widest uppercase rounded-lg transition-all duration-300 shadow-[0_4px_15px_rgba(245,158,11,0.3)] hover:shadow-[0_4px_20px_rgba(15,23,42,0.25)] hover:-translate-y-0.5 cursor-pointer font-mono border border-transparent"
                 >
-                  Speak With Our Experts
+                  SPEAK WITH OUR EXPERTS
+                  <svg className="w-4 h-4 text-current transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -3191,7 +3374,6 @@ export default function App() {
 
                 {/* Clean Automated Hero Slider for Latest News */}
                 {(() => {
-                  const allNews = getNews();
                   let sliderNews = allNews.filter((item: any) => item.featured === true || item.featured === 'true');
                   if (sliderNews.length === 0) {
                     sliderNews = allNews.slice(0, 3);
@@ -3329,7 +3511,7 @@ export default function App() {
 
                 {/* News Grid (filtered) */}
                 {(() => {
-                  const filteredNews = getNews()
+                  const filteredNews = allNews
                     .filter((item: any) => {
                       // Filter out draft posts from public news tab
                       if (item.status === 'draft') return false;
@@ -3545,7 +3727,7 @@ export default function App() {
               </>
             ) : (
               (() => {
-                const item = getNews().find(n => n.id === selectedNewsId);
+                const item = allNews.find(n => n.id === selectedNewsId);
                 if (!item) return null;
                 return (
                   <div className="space-y-8 animate-fadeIn max-w-3xl mx-auto">
@@ -3600,6 +3782,24 @@ export default function App() {
                       </p>
                     </div>
 
+                    {/* Dynamic Link Back to Main Property Views */}
+                    <div className="relative rounded-2xl bg-neutral-900/60 border border-neutral-800 p-6 md:p-8 space-y-4 shadow-xl">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="space-y-2">
+                          <h4 className="text-lg font-serif font-bold text-white">Looking for Strategic Land Opportunities Featured in our News?</h4>
+                          <p className="text-neutral-400 text-sm font-light max-w-2xl">
+                            Explore Parvat Reality's premium, clear-title plot developments near the Navi Mumbai International Airport and scenic Pali/Pen corridors.
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => navigateTo('projects')}
+                          className="px-6 py-3 bg-amber-500 hover:bg-white text-neutral-950 font-mono font-bold text-xs tracking-widest uppercase rounded-xl transition-all duration-300 shrink-0 cursor-pointer shadow-md"
+                        >
+                          EXPLORE ALL PLOTS
+                        </button>
+                      </div>
+                    </div>
+
                     {/* Premium Recommendation Section */}
                     <div className="pt-16 border-t border-neutral-900 mt-16 space-y-10">
                       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -3619,7 +3819,7 @@ export default function App() {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {getNews()
+                        {allNews
                           .filter((n: any) => n.id !== item.id)
                           .slice(0, 3)
                           .map((otherItem: any, index: number) => (
@@ -3868,28 +4068,46 @@ export default function App() {
                         {proj.amenities && proj.amenities.length > 0 ? (
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             {proj.amenities.map((amenity: string) => {
-                              let Icon = Compass;
+                              const { Icon, bgClass, iconColor } = getAmenityDetails(amenity);
                               let descText = 'Premium physical feature';
-                              if (amenity === 'Electricity') {
-                                Icon = Zap;
+                              let borderHover = 'hover:border-amber-500/20';
+                              let iconBgHover = 'group-hover:bg-amber-500/10 group-hover:border-amber-500/30';
+                              let dynamicTextColor = 'text-amber-500';
+
+                              const lower = amenity.toLowerCase();
+                              if (lower.includes('electricity') || lower.includes('power')) {
                                 descText = 'High voltage grid ready';
-                              } else if (amenity === 'Water Supply') {
-                                Icon = Droplet;
+                                borderHover = 'hover:border-amber-500/30';
+                                iconBgHover = 'group-hover:bg-amber-500/10 group-hover:border-amber-500/30';
+                                dynamicTextColor = 'text-amber-500';
+                              } else if (lower.includes('water')) {
                                 descText = 'Continuous source connectivity';
-                              } else if (amenity === 'Fencing') {
-                                Icon = Shield;
-                                descText = 'Complete boundary protection';
-                              } else if (amenity === 'Road Access') {
-                                Icon = Map;
+                                borderHover = 'hover:border-blue-500/30';
+                                iconBgHover = 'group-hover:bg-blue-500/10 group-hover:border-blue-500/30';
+                                dynamicTextColor = 'text-blue-400';
+                              } else if (lower.includes('road') || lower.includes('access')) {
                                 descText = 'Wide concrete access touch';
+                                borderHover = 'hover:border-emerald-500/30';
+                                iconBgHover = 'group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30';
+                                dynamicTextColor = 'text-emerald-400';
+                              } else if (lower.includes('fencing') || lower.includes('shield') || lower.includes('security')) {
+                                descText = 'Complete boundary protection';
+                                borderHover = 'hover:border-indigo-500/30';
+                                iconBgHover = 'group-hover:bg-indigo-500/10 group-hover:border-indigo-500/30';
+                                dynamicTextColor = 'text-indigo-400';
+                              } else {
+                                borderHover = 'hover:border-slate-500/30';
+                                iconBgHover = 'group-hover:bg-slate-500/10 group-hover:border-slate-500/30';
+                                dynamicTextColor = 'text-slate-400';
                               }
+
                               return (
                                 <div 
                                   key={amenity}
-                                  className="p-4 bg-neutral-900/40 border border-neutral-900 hover:border-amber-500/20 rounded-xl space-y-2.5 transition-colors group"
+                                  className={`p-4 bg-neutral-900/40 border border-neutral-900 rounded-xl space-y-2.5 transition-all duration-300 group ${borderHover}`}
                                 >
-                                  <div className="w-10 h-10 rounded-lg bg-neutral-950 flex items-center justify-center border border-neutral-850 group-hover:bg-amber-500/10 group-hover:border-amber-500/30 transition-colors">
-                                    <Icon className="w-5 h-5 text-amber-500" />
+                                  <div className={`w-10 h-10 rounded-lg bg-neutral-950 flex items-center justify-center border border-neutral-850 transition-colors ${iconBgHover}`}>
+                                    <Icon className={`w-5 h-5 ${dynamicTextColor}`} />
                                   </div>
                                   <div>
                                     <div className="text-xs font-bold text-white tracking-wider uppercase font-mono">{amenity}</div>
@@ -4113,7 +4331,14 @@ export default function App() {
                   <a href="#" className="social-icon-btn w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" title="LinkedIn" aria-label="LinkedIn">
                     <Linkedin className="w-4 h-4 text-white" />
                   </a>
-                  <a href="#" className="social-icon-btn w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" title="Facebook" aria-label="Facebook">
+                  <a 
+                    href="https://www.facebook.com/share/1DqihkWgEj/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="social-icon-btn w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" 
+                    title="Facebook" 
+                    aria-label="Facebook"
+                  >
                     <Facebook className="w-4 h-4 text-white" />
                   </a>
                   <a href="#" className="social-icon-btn w-9 h-9 rounded-lg flex items-center justify-center transition-all duration-300" title="Instagram" aria-label="Instagram">
@@ -4203,12 +4428,18 @@ export default function App() {
                 Plot No 45, 46 And 55, Sector 11,<br />
                 CBD Belapur, Navi Mumbai, Maharashtra 400614
               </p>
-              <div className="space-y-2 text-xs font-mono pt-2">
-                <a href="tel:+918591668166" className="block text-white/90 hover:text-white transition-colors">
-                  📞 +91 85916 68166
+              <div className="space-y-2.5 text-xs font-mono pt-2">
+                <a href="tel:+918591668166" className="flex items-center gap-2 text-white/90 hover:text-white transition-all duration-300">
+                  <Phone className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>+91 85916 68166</span>
                 </a>
-                <a href="mailto:Info.parvatreality@gmail.com" className="block text-white/90 hover:text-white transition-colors">
-                  ✉️ Info.parvatreality@gmail.com
+                <a href="tel:+918591818166" className="flex items-center gap-2 text-white/90 hover:text-white transition-all duration-300">
+                  <Phone className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>+91 85918 18166</span>
+                </a>
+                <a href="mailto:Info.parvatreality@gmail.com" className="flex items-center gap-2 text-white/90 hover:text-white transition-all duration-300 pt-1">
+                  <Mail className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span>Info.parvatreality@gmail.com</span>
                 </a>
               </div>
             </div>
