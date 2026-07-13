@@ -170,20 +170,32 @@
                     Verifying...
                 `;
 
-                // Verify the credentials directly against the authorized administrator credentials in frontend JS state
-                if ((email === "admin@parvatreality.com" || email === "omkarwanve7@gmail.com") && password === "admin123") {
-                    // Store secure local session for admin
-                    sessionStorage.setItem('parvat_admin_session', JSON.stringify({
+                // Send the credentials to our secure server-side api.php endpoint to verify without exposing sensitive dynamic variables in static frontend code
+                const response = await fetch('/api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'login',
                         email: email,
-                        displayName: email === "omkarwanve7@gmail.com" ? "Omkar Wanve" : "Parvat Admin",
-                        token: "secure_admin_session_token_998877"
-                    }));
+                        password: password
+                    })
+                });
 
-                    // Redirect on success
-                    window.location.href = 'admin.html';
-                } else {
-                    throw new Error("Invalid admin email or password");
+                const data = await response.json();
+
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || "Invalid admin email or password");
                 }
+
+                // Store secure session for administrator
+                sessionStorage.setItem('parvat_admin_session', JSON.stringify({
+                    email: data.user.email,
+                    displayName: data.user.displayName,
+                    token: data.user.token
+                }));
+
+                // Redirect on success
+                window.location.href = 'admin.html';
             } catch (error) {
                 console.error("Email sign-in error:", error);
                 alert("Authentication failed: " + error.message);

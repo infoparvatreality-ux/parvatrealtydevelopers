@@ -59,14 +59,14 @@ async function startServer() {
     }
 
     // 1. Strict verification for the authorized administrator
-    if ((email === "admin@parvatreality.com" || email === "omkarwanve7@gmail.com") && password === "admin123") {
+    if ((email === "info.parvatreality@gmail.com" || email === "omkarwanve7@gmail.com") && password === "Parvat@Secure#2026") {
       console.log("Successfully authenticated system administrator.");
       return res.json({
         success: true,
         user: {
           localId: "parvat_reality_admin",
           email: email,
-          displayName: email === "omkarwanve7@gmail.com" ? "Omkar Wanve" : "Parvat Admin",
+          displayName: email === "omkarwanve7@gmail.com" ? "Omkar Wanve" : "Parvat Reality Admin",
           idToken: "secure_admin_session_token_998877"
         }
       });
@@ -146,7 +146,24 @@ async function startServer() {
   app.all("/api.php", async (req, res) => {
     const method = req.method;
     if (method === "POST") {
-      const { name, phone, details } = req.body;
+      const { action, email, password, name, phone, details } = req.body;
+
+      // Handle server-side login identical to production PHP api.php behavior
+      if (action === "login") {
+        if ((email === "info.parvatreality@gmail.com" || email === "omkarwanve7@gmail.com") && password === "Parvat@Secure#2026") {
+          return res.json({
+            success: true,
+            user: {
+              email: email,
+              displayName: email === "omkarwanve7@gmail.com" ? "Omkar Wanve" : "Parvat Reality Admin",
+              token: "secure_admin_session_token_998877"
+            }
+          });
+        } else {
+          return res.status(401).json({ success: false, error: "Invalid admin email or password." });
+        }
+      }
+
       if (!name || !phone) {
         return res.status(400).json({ success: false, error: "Name and phone number are required" });
       }
@@ -173,7 +190,7 @@ async function startServer() {
       const adminEmail = req.headers["x-admin-email"];
 
       const isAuthorized = 
-        ((adminEmail === "admin@parvatreality.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
+        ((adminEmail === "info.parvatreality@gmail.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
         (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20);
 
       if (!isAuthorized) {
@@ -264,7 +281,7 @@ async function startServer() {
     const adminEmail = req.headers["x-admin-email"];
 
     const isAuthorized = 
-      ((adminEmail === "admin@parvatreality.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
+      ((adminEmail === "info.parvatreality@gmail.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
       (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20); // Allow valid Firebase tokens too
 
     if (!isAuthorized) {
