@@ -1473,44 +1473,61 @@
         }
 
         window.syncNewsEcosystemToServer = function() {
-            const news = JSON.parse(localStorage.getItem('parvat_news') || '[]');
-            const categories = JSON.parse(localStorage.getItem('parvat_news_categories') || '["All", "Land Launches", "Market Updates", "Corporate News"]');
-            const heroTitle = localStorage.getItem('parvat_news_hero_title') || 'PARVAT MEDIA ROOM';
-            const heroText = localStorage.getItem('parvat_news_hero_text') || 'Expanding our greenfield residential luxury landscape footprint across India.';
-            const heroImage = localStorage.getItem('parvat_news_hero_image') || null;
+            try {
+                const news = JSON.parse(localStorage.getItem('parvat_news') || '[]');
+                const categories = JSON.parse(localStorage.getItem('parvat_news_categories') || '["All", "Land Launches", "Market Updates", "Corporate News"]');
+                const heroTitle = localStorage.getItem('parvat_news_hero_title') || 'PARVAT MEDIA ROOM';
+                const heroText = localStorage.getItem('parvat_news_hero_text') || 'Expanding our greenfield residential luxury landscape footprint across India.';
+                const heroImage = localStorage.getItem('parvat_news_hero_image') || null;
 
-            const sessionStr = sessionStorage.getItem('parvat_admin_session');
-            let token = 'secure_admin_session_token_998877';
-            let email = 'omkarwanve7@gmail.com';
-            if (sessionStr) {
-                try {
-                    const sessionData = JSON.parse(sessionStr);
-                    token = sessionData.token || token;
-                    email = sessionData.email || email;
-                } catch (e) {}
-            }
+                const sessionStr = sessionStorage.getItem('parvat_admin_session');
+                let token = 'secure_admin_session_token_998877';
+                let email = 'omkarwanve7@gmail.com';
+                if (sessionStr) {
+                    try {
+                        const sessionData = JSON.parse(sessionStr);
+                        token = sessionData.token || token;
+                        email = sessionData.email || email;
+                    } catch (e) {}
+                }
 
-            fetch('/api.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                    'X-Admin-Email': email
-                },
-                body: JSON.stringify({
-                    action: 'save_news_ecosystem',
-                    news: news,
-                    categories: categories,
-                    hero: {
-                        title: heroTitle,
-                        text: heroText,
-                        image: heroImage
+                fetch('/api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                        'X-Admin-Email': email
+                    },
+                    body: JSON.stringify({
+                        action: 'save_news_ecosystem',
+                        news: news,
+                        categories: categories,
+                        hero: {
+                            title: heroTitle,
+                            text: heroText,
+                            image: heroImage
+                        }
+                    })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`Server returned a bad status code: ${res.status} ${res.statusText}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.success) {
+                        console.log("News ecosystem synced to server successfully:", data);
+                    } else {
+                        console.error("Server failed to save news ecosystem. Data:", data);
                     }
                 })
-            })
-            .then(res => res.json())
-            .then(data => console.log("News ecosystem synced to server:", data))
-            .catch(err => console.error("Failed to sync news ecosystem:", err));
+                .catch(err => {
+                    console.error("Failed to sync news ecosystem API call:", err);
+                });
+            } catch (err) {
+                console.error("Comprehensive catch inside syncNewsEcosystemToServer:", err);
+            }
         };
 
         function saveNews(news) {
@@ -1939,64 +1956,117 @@
 
         function handleNewsSubmit(e) {
             e.preventDefault();
-            const id = document.getElementById('news-id').value;
-            const title = document.getElementById('news-title').value;
-            const author = "Corporate Desk";
-            const date = document.getElementById('news-date').value;
-            const snippet = document.getElementById('news-snippet').value;
-            const imageUrl = document.getElementById('news-image-url').value;
-            const videoLink = document.getElementById('news-video-url').value;
-            
-            const category = document.getElementById('news-category').value;
-            const featured = document.getElementById('news-featured').checked;
-            const pinned = document.getElementById('news-pinned').checked;
-            const status = document.getElementById('news-published').checked ? 'published' : 'draft';
-            const showOnHome = document.getElementById('news-show-home').checked;
-            const readingTime = document.getElementById('news-reading-time').value;
-            
-            let newsList = getNews();
+            try {
+                const idEl = document.getElementById('news-id');
+                const titleEl = document.getElementById('news-title');
+                const dateEl = document.getElementById('news-date');
+                const snippetEl = document.getElementById('news-snippet');
+                const imageUrlEl = document.getElementById('news-image-url');
+                const videoLinkEl = document.getElementById('news-video-url');
+                const categoryEl = document.getElementById('news-category');
+                const featuredEl = document.getElementById('news-featured');
+                const pinnedEl = document.getElementById('news-pinned');
+                const statusEl = document.getElementById('news-published');
+                const showOnHomeEl = document.getElementById('news-show-home');
+                const readingTimeEl = document.getElementById('news-reading-time');
 
-            // If primary cover image url is empty, automatically find the first image in currentMediaFiles
-            let image = imageUrl ? imageUrl.trim() : "";
-            if (!image) {
-                const firstLocalImageObj = currentMediaFiles.find(f => 
-                    (f.type && f.type.startsWith('image')) || 
-                    (f.data && f.data.startsWith('data:image')) ||
-                    (f.data && (f.data.startsWith('/uploads/') || f.data.startsWith('http')))
-                );
-                if (firstLocalImageObj) {
-                    image = firstLocalImageObj.data;
+                const id = idEl ? idEl.value : '';
+                const title = titleEl ? titleEl.value : '';
+                const author = "Corporate Desk";
+                const date = dateEl ? dateEl.value : '';
+                const snippet = snippetEl ? snippetEl.value : '';
+                const imageUrl = imageUrlEl ? imageUrlEl.value : '';
+                const videoLink = videoLinkEl ? videoLinkEl.value : '';
+                const category = categoryEl ? categoryEl.value : '';
+                const featured = featuredEl ? featuredEl.checked : false;
+                const pinned = pinnedEl ? pinnedEl.checked : false;
+                const status = (statusEl && statusEl.checked) ? 'published' : 'draft';
+                const showOnHome = showOnHomeEl ? showOnHomeEl.checked : false;
+                const readingTime = readingTimeEl ? readingTimeEl.value : '';
+                
+                let newsList = [];
+                try {
+                    newsList = getNews();
+                    if (!Array.isArray(newsList)) {
+                        newsList = [];
+                    }
+                } catch (err) {
+                    console.warn("getNews() failed or returned non-array, using empty array fallback.", err);
+                    newsList = [];
                 }
-            }
-            
-            // If still empty and we are editing, fallback to existing image
-            if (!image && id) {
-                const existingNews = newsList.find(n => n.id === id);
-                if (existingNews && existingNews.image) {
-                    image = existingNews.image;
+
+                // Safely search for primary cover image or fallback to first uploaded local image
+                let image = "";
+                try {
+                    image = (imageUrl && typeof imageUrl === "string") ? imageUrl.trim() : "";
+                } catch (err) {
+                    console.warn("imageUrl parsing failed, using empty string.", err);
+                    image = "";
                 }
-            }
-            
-            if (id) {
-                const idx = newsList.findIndex(n => n.id === id);
-                if (idx !== -1) {
-                    newsList[idx] = { 
-                        ...newsList[idx], 
-                        title, author, date, snippet, image, videoLink, 
+
+                try {
+                    if (!image) {
+                        const mediaArr = Array.isArray(currentMediaFiles) ? currentMediaFiles : [];
+                        const firstLocalImageObj = mediaArr.find(f => {
+                            if (!f) return false;
+                            const type = f.type || "";
+                            const data = f.data || "";
+                            return (typeof type === "string" && type.startsWith('image')) || 
+                                   (typeof data === "string" && data.startsWith('data:image')) ||
+                                   (typeof data === "string" && (data.startsWith('/uploads/') || data.startsWith('http')));
+                        });
+                        if (firstLocalImageObj && firstLocalImageObj.data) {
+                            image = firstLocalImageObj.data;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error matching first local image object:", err);
+                }
+
+                // If still empty and we are editing, fallback to existing image
+                try {
+                    if (!image && id) {
+                        const existingNews = newsList.find(n => n && n.id === id);
+                        if (existingNews && existingNews.image) {
+                            image = existingNews.image;
+                        }
+                    }
+                } catch (err) {
+                    console.error("Error fetching existing image:", err);
+                }
+
+                // If still undefined or null, forcefully assign empty string
+                if (image === undefined || image === null) {
+                    image = "";
+                }
+                
+                const mediaToSave = Array.isArray(currentMediaFiles) ? currentMediaFiles : [];
+
+                if (id) {
+                    const idx = newsList.findIndex(n => n && n.id === id);
+                    if (idx !== -1) {
+                        newsList[idx] = { 
+                            ...newsList[idx], 
+                            title, author, date, snippet, image, videoLink, 
+                            category, featured, pinned, status, showOnHome, readingTime,
+                            media: mediaToSave
+                        };
+                    }
+                } else {
+                    newsList.unshift({
+                        id: 'n_' + Date.now(),
+                        title, author, date, snippet, image, videoLink,
                         category, featured, pinned, status, showOnHome, readingTime,
-                        media: currentMediaFiles 
-                    };
+                        media: mediaToSave
+                    });
                 }
-            } else {
-                newsList.unshift({
-                    id: 'n_' + Date.now(),
-                    title, author, date, snippet, image, videoLink,
-                    category, featured, pinned, status, showOnHome, readingTime,
-                    media: currentMediaFiles
-                });
+                
+                saveNews(newsList);
+                closeNewsModal();
+            } catch (err) {
+                console.error("Comprehensive catch inside handleNewsSubmit:", err);
+                alert("An unexpected error occurred while saving the news article. Please check the browser console for details.");
             }
-            saveNews(newsList);
-            closeNewsModal();
         }
 
         function deleteNews(id) {

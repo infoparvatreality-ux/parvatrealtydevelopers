@@ -411,9 +411,9 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
   if (item.image) {
     images.push(item.image);
   }
-  if (item.media && item.media.length > 0) {
+  if (Array.isArray(item.media)) {
     item.media.forEach((m: any) => {
-      if (m.type && m.type.startsWith('image/') && !images.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('image/') && m.data && !images.includes(m.data)) {
         images.push(m.data);
       }
     });
@@ -424,9 +424,9 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
   if (item.videoLink) {
     videos.push(item.videoLink);
   }
-  if (item.media && item.media.length > 0) {
+  if (Array.isArray(item.media)) {
     item.media.forEach((m: any) => {
-      if (m.type && m.type.startsWith('video/') && !videos.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') && m.data && !videos.includes(m.data)) {
         videos.push(m.data);
       }
     });
@@ -585,9 +585,9 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   if (proj.image) {
     images.push(proj.image);
   }
-  if (proj.media && proj.media.length > 0) {
+  if (Array.isArray(proj.media)) {
     proj.media.forEach((m: any) => {
-      if (m.type && m.type.startsWith('image/') && !images.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('image/') && m.data && !images.includes(m.data)) {
         images.push(m.data);
       }
     });
@@ -598,9 +598,9 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   if (proj.videoLink) {
     videos.push(proj.videoLink);
   }
-  if (proj.media && proj.media.length > 0) {
+  if (Array.isArray(proj.media)) {
     proj.media.forEach((m: any) => {
-      if (m.type && m.type.startsWith('video/') && !videos.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') && m.data && !videos.includes(m.data)) {
         videos.push(m.data);
       }
     });
@@ -1583,15 +1583,33 @@ export default function App() {
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
       // Save to Hostinger MySQL Database via backend API (api.php)
-      fetch('/api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: formData.name,
-          phone: formData.phone,
-          details: `Email: ${formData.email} | Source: Main Banner Modal | Interest: ${formData.plotType || 'Buy Farmhouse Land'} | Message: ${formData.message}`
+      try {
+        fetch('/api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name,
+            phone: formData.phone,
+            details: `Email: ${formData.email} | Source: Main Banner Modal | Interest: ${formData.plotType || 'Buy Farmhouse Land'} | Message: ${formData.message}`
+          })
         })
-      }).catch(err => console.error("Failed to post lead to backend database:", err));
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Server returned bad status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && !data.success) {
+            console.error("Server failed to save lead:", data);
+          } else {
+            console.log("Lead saved successfully:", data);
+          }
+        })
+        .catch(err => console.error("Failed to post lead to backend database:", err));
+      } catch (err) {
+        console.error("Comprehensive catch inside lead submit:", err);
+      }
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1633,15 +1651,33 @@ export default function App() {
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
       // Save to Hostinger MySQL Database via backend API (api.php)
-      fetch('/api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: appointmentForm.name,
-          phone: appointmentForm.mobile,
-          details: `Email: ${appointmentForm.email} | Source: Main Banner Modal | Interest: ${appointmentForm.interest || 'Buy Farmhouse Land'}`
+      try {
+        fetch('/api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: appointmentForm.name,
+            phone: appointmentForm.mobile,
+            details: `Email: ${appointmentForm.email} | Source: Main Banner Modal | Interest: ${appointmentForm.interest || 'Buy Farmhouse Land'}`
+          })
         })
-      }).catch(err => console.error("Failed to post lead to backend database:", err));
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Server returned bad status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && !data.success) {
+            console.error("Server failed to save lead:", data);
+          } else {
+            console.log("Lead saved successfully:", data);
+          }
+        })
+        .catch(err => console.error("Failed to post lead to backend database:", err));
+      } catch (err) {
+        console.error("Comprehensive catch inside appointment lead submit:", err);
+      }
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1688,15 +1724,33 @@ export default function App() {
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
       // Save to Hostinger MySQL Database via backend API (api.php)
-      fetch('/api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: joinFamilyForm.name,
-          phone: joinFamilyForm.phone,
-          details: `Email: ${joinFamilyForm.email} | Source: Bottom Registration Form | Interest: ${joinFamilyForm.preferredProperty || 'Residential Plots'}`
+      try {
+        fetch('/api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: joinFamilyForm.name,
+            phone: joinFamilyForm.phone,
+            details: `Email: ${joinFamilyForm.email} | Source: Bottom Registration Form | Interest: ${joinFamilyForm.preferredProperty || 'Residential Plots'}`
+          })
         })
-      }).catch(err => console.error("Failed to post lead to backend database:", err));
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Server returned bad status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && !data.success) {
+            console.error("Server failed to save lead:", data);
+          } else {
+            console.log("Lead saved successfully:", data);
+          }
+        })
+        .catch(err => console.error("Failed to post lead to backend database:", err));
+      } catch (err) {
+        console.error("Comprehensive catch inside join family lead submit:", err);
+      }
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -1748,15 +1802,33 @@ export default function App() {
       localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
       // Save to Hostinger MySQL Database via backend API (api.php)
-      fetch('/api.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: corporateForm.name,
-          phone: corporateForm.phone,
-          details: `Email: ${corporateForm.email} | Source: Corporate Enquiry Form | Age: ${corporateForm.age || 'N/A'} | Gender: ${corporateForm.gender || 'Corporate'} | Message: ${corporateForm.message}`
+      try {
+        fetch('/api.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: corporateForm.name,
+            phone: corporateForm.phone,
+            details: `Email: ${corporateForm.email} | Source: Corporate Enquiry Form | Age: ${corporateForm.age || 'N/A'} | Gender: ${corporateForm.gender || 'Corporate'} | Message: ${corporateForm.message}`
+          })
         })
-      }).catch(err => console.error("Failed to post lead to backend database:", err));
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`Server returned bad status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then(data => {
+          if (data && !data.success) {
+            console.error("Server failed to save lead:", data);
+          } else {
+            console.log("Lead saved successfully:", data);
+          }
+        })
+        .catch(err => console.error("Failed to post lead to backend database:", err));
+      } catch (err) {
+        console.error("Comprehensive catch inside corporate lead submit:", err);
+      }
     } catch (err) {
       console.error("Error saving lead:", err);
     }
@@ -2552,14 +2624,14 @@ export default function App() {
                     style={{ animationDelay: `${index * 120}ms` }}
                     className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
                   >
-                    {item.media && item.media.length > 0 ? (
+                    {Array.isArray(item.media) && item.media.length > 0 ? (
                       <div className="relative h-24 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
                         {item.media.map((m: any, idx: number) => (
                           <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                            {m.type.startsWith('video/') ? (
+                            {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                             ) : (
-                               <img src={m.data} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                               <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                             )}
                           </div>
                         ))}
@@ -3648,14 +3720,14 @@ export default function App() {
                               style={{ animationDelay: `${index * 120}ms` }}
                               className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
-                              {item.media && item.media.length > 0 ? (
+                              {Array.isArray(item.media) && item.media.length > 0 ? (
                                 <div className="relative h-28 sm:h-36 md:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
                                   {item.media.map((m: any, idx: number) => (
                                     <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                                      {m.type.startsWith('video/') ? (
+                                      {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                          <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                       ) : (
-                                         <img src={m.data} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                         <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                                       )}
                                     </div>
                                   ))}
@@ -3966,14 +4038,14 @@ export default function App() {
                               style={{ animationDelay: `${index * 120}ms` }}
                               className="bg-neutral-900 border border-neutral-800/80 hover:border-amber-500/30 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
-                              {otherItem.media && otherItem.media.length > 0 ? (
+                              {Array.isArray(otherItem.media) && otherItem.media.length > 0 ? (
                                 <div className="relative h-40 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none bg-neutral-950">
                                   {otherItem.media.map((m: any, idx: number) => (
                                     <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                                      {m.type.startsWith('video/') ? (
+                                      {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                          <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                       ) : (
-                                         <img src={m.data} alt={otherItem.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                         <img src={m ? m.data : ''} alt={otherItem.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                                       )}
                                     </div>
                                   ))}
@@ -4300,15 +4372,33 @@ export default function App() {
                             localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
 
                             // Save to Hostinger MySQL Database via backend API (api.php)
-                            fetch('/api.php', {
-                              method: 'POST',
-                              headers: { 'Content-Type': 'application/json' },
-                              body: JSON.stringify({
-                                name: nameVal,
-                                phone: phoneVal,
-                                details: `Source: Property Page Callback | Interest: ${proj ? proj.title : 'General Land Asset'}`
+                            try {
+                              fetch('/api.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  name: nameVal,
+                                  phone: phoneVal,
+                                  details: `Source: Property Page Callback | Interest: ${proj ? proj.title : 'General Land Asset'}`
+                                })
                               })
-                            }).catch(err => console.error("Failed to post lead to backend database:", err));
+                              .then(res => {
+                                if (!res.ok) {
+                                  throw new Error(`Server returned bad status: ${res.status}`);
+                                }
+                                return res.json();
+                              })
+                              .then(data => {
+                                if (data && !data.success) {
+                                  console.error("Server failed to save lead:", data);
+                                } else {
+                                  console.log("Lead saved successfully:", data);
+                                }
+                              })
+                              .catch(err => console.error("Failed to post lead to backend database:", err));
+                            } catch (err) {
+                              console.error("Comprehensive catch inside property lead submit:", err);
+                            }
                           } catch (err) {
                             console.error("Error saving property lead:", err);
                           }
