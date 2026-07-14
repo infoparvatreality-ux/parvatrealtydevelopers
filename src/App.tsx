@@ -34,6 +34,45 @@ import {
   Shield
 } from 'lucide-react';
 
+const scrubBase64FromNews = (newsArray: any[]): any[] => {
+  if (!Array.isArray(newsArray)) return [];
+  return newsArray.map(item => {
+    if (!item) return item;
+    const newItem = { ...item };
+    if (typeof newItem.image === 'string' && newItem.image.startsWith('data:')) {
+      newItem.image = '';
+    }
+    if (typeof newItem.videoLink === 'string' && newItem.videoLink.startsWith('data:')) {
+      newItem.videoLink = '';
+    }
+    if (Array.isArray(newItem.media)) {
+      newItem.media = newItem.media.map((m: any) => {
+        if (!m) return m;
+        const newM = { ...m };
+        if (typeof newM.data === 'string' && newM.data.startsWith('data:')) {
+          newM.data = '';
+        }
+        return newM;
+      });
+    }
+    return newItem;
+  });
+};
+
+const safeSetLocalStorageNews = (news: any[]): void => {
+  try {
+    localStorage.setItem('parvat_news', JSON.stringify(news));
+  } catch (e) {
+    console.warn("localStorage quota exceeded or write failed. Storing scrubbed text-only news data...", e);
+    try {
+      const scrubbed = scrubBase64FromNews(news);
+      localStorage.setItem('parvat_news', JSON.stringify(scrubbed));
+    } catch (err) {
+      console.error("Critical failure: failed to save even scrubbed news to localStorage:", err);
+    }
+  }
+};
+
 const getAmenityDetails = (amenity: string) => {
   let Icon = Compass;
   let bgClass = "bg-slate-500/10 hover:bg-slate-500/20 text-slate-300 border-slate-500/20";
@@ -1303,7 +1342,7 @@ export default function App() {
         if (data.success) {
           if (Array.isArray(data.news)) {
             setAllNews(data.news);
-            localStorage.setItem('parvat_news', JSON.stringify(data.news));
+            safeSetLocalStorageNews(data.news);
           }
           if (Array.isArray(data.categories)) {
             const filtered = data.categories.filter((c: string) => c !== 'All');
