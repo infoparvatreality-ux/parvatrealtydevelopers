@@ -457,6 +457,9 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
       }
     });
   }
+  if (images.length === 0) {
+    images.push("https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80");
+  }
 
   // Extract all videos
   const videos: string[] = [];
@@ -491,6 +494,9 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
             <img 
               src={images[0]} 
               alt={item.title} 
+              onError={(e) => {
+                e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+              }}
               className="w-full h-auto max-h-[70vh] object-contain mx-auto block animate-in fade-in duration-300"
               referrerPolicy="no-referrer"
             />
@@ -501,6 +507,9 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
                 <img 
                   src={images[activeIdx]} 
                   alt={`${item.title} - ${activeIdx + 1}`} 
+                  onError={(e) => {
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                  }}
                   className="w-full h-full object-contain mx-auto block transition-all duration-300 animate-in fade-in"
                   referrerPolicy="no-referrer"
                 />
@@ -2656,7 +2665,7 @@ export default function App() {
                 <p className="text-neutral-500 text-sm font-light">No announcements or news articles are currently published. Stay tuned for upcoming updates.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 md:gap-8">
                 {allNews.filter((item: any) => item.status !== 'draft' && item.showOnHome !== false).map((item, index) => (
                   <div 
                     key={item.id}
@@ -2666,13 +2675,20 @@ export default function App() {
                   >
                     <div className="flex-1 flex flex-col">
                       {Array.isArray(item.media) && item.media.length > 0 ? (
-                        <div className="relative h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
+                        <div className="relative h-28 xs:h-36 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
                           {item.media.map((m: any, idx: number) => (
                             <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
                               {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                  <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                               ) : (
-                                 <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                 <img 
+                                   src={m && m.data ? m.data : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                   alt={item.title} 
+                                   onError={(e) => {
+                                     e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                   }}
+                                   className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                                 />
                               )}
                             </div>
                           ))}
@@ -2684,46 +2700,53 @@ export default function App() {
                             </div>
                           )}
                         </div>
-                      ) : item.image ? (
-                        <div className="relative h-48 w-full overflow-hidden">
-                          <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                      ) : (
+                        <div className="relative h-28 xs:h-36 sm:h-48 w-full overflow-hidden">
+                          <img 
+                            src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                            alt={item.title} 
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                            }}
+                            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                          />
                           {item.videoLink && (
                             <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all">
-                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
-                                <Play className="w-3 h-3 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
+                              <div className="w-6 h-6 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
+                                <Play className="w-2 h-2 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
                               </div>
                             </div>
                           )}
                         </div>
-                      ) : null}
-                      <div className="p-5 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col justify-between">
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500">
+                      )}
+                      <div className="p-3 sm:p-5 md:p-6 space-y-2 sm:space-y-3 flex-1 flex flex-col justify-between">
+                        <div className="space-y-1 sm:space-y-2">
+                          <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-neutral-500">
                             <span>{item.date}</span>
-                            <span className="text-amber-500/80 uppercase truncate max-w-[120px]">{item.author}</span>
+                            <span className="text-amber-500/80 uppercase truncate max-w-[80px] sm:max-w-[120px]">{item.author}</span>
                           </div>
-                          <h4 className="text-sm sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">
+                          <h4 className="text-xs sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">
                             {item.title}
                           </h4>
-                          <p className="text-neutral-400 text-xs font-light leading-relaxed line-clamp-3 sm:line-clamp-4">
+                          <p className="text-neutral-400 text-[10px] sm:text-xs font-light leading-relaxed line-clamp-2 sm:line-clamp-4">
                             {item.snippet}
                           </p>
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex items-center justify-between gap-2 bg-neutral-950/20">
-                      <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
-                      <div className="flex items-center gap-2">
+                    <div className="p-2.5 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex items-center justify-between gap-1 sm:gap-2 bg-neutral-950/20">
+                      <span className="text-[8px] sm:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
+                      <div className="flex items-center gap-1.5 sm:gap-2">
                         <button 
                           onClick={(e) => { e.stopPropagation(); }} 
                           className="text-neutral-500 hover:text-amber-500 transition-colors p-1" 
                           title="Share" 
                           aria-label="Share"
                         >
-                          <Share2 className="w-4 h-4" />
+                          <Share2 className="w-3 h-3 sm:w-4 h-4" />
                         </button>
                         <span 
-                          className="text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-1"
+                          className="text-[10px] sm:text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-1"
                         >
                           Read &rarr;
                         </span>
@@ -3611,16 +3634,20 @@ export default function App() {
                                 <img 
                                   src={item.media[0].data} 
                                   alt={item.title} 
-                                  className="w-full h-full object-contain opacity-100 transition-transform duration-[10000ms] ease-out"
-                                />
-                              ) : item.image ? (
-                                <img 
-                                  src={item.image} 
-                                  alt={item.title} 
+                                  onError={(e) => {
+                                    e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                  }}
                                   className="w-full h-full object-contain opacity-100 transition-transform duration-[10000ms] ease-out"
                                 />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-neutral-950 via-neutral-900 to-amber-950/20 opacity-90" />
+                                <img 
+                                  src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                  alt={item.title} 
+                                  onError={(e) => {
+                                    e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                  }}
+                                  className="w-full h-full object-contain opacity-100 transition-transform duration-[10000ms] ease-out"
+                                />
                               )}
                             </div>
 
@@ -3772,7 +3799,14 @@ export default function App() {
                                         {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                            <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                         ) : (
-                                           <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                           <img 
+                                             src={m && m.data ? m.data : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                             alt={item.title} 
+                                             onError={(e) => {
+                                               e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                             }}
+                                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                                           />
                                         )}
                                       </div>
                                     ))}
@@ -3784,16 +3818,23 @@ export default function App() {
                                       </div>
                                     )}
                                   </div>
-                                ) : item.image ? (
+                                ) : (
                                   <div className="relative h-48 w-full overflow-hidden">
-                                    <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                    <img 
+                                      src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                      alt={item.title} 
+                                      onError={(e) => {
+                                        e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                      }}
+                                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                                    />
                                     {item.videoLink && (
                                       <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1.5">
                                         <Play className="w-4 h-4 text-amber-500" />
                                       </div>
                                     )}
                                   </div>
-                                ) : null}
+                                )}
                                 <div className="p-5 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col justify-between">
                                   <div className="space-y-2">
                                     <div className="flex flex-wrap items-center gap-1 sm:gap-2">
