@@ -1338,7 +1338,7 @@
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Primary Cover Image URL</label>
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Primary Cover Image URL (Optional)</label>
                         <input type="url" id="news-image-url" placeholder="https://example.com/cover-image.jpg" class="w-full bg-slate-50 border border-slate-200 focus:border-rose-600 focus:ring-1 focus:ring-rose-600 text-slate-900 rounded-lg px-4 py-2.5 text-xs outline-none transition-all">
                     </div>
                     <div class="space-y-1.5">
@@ -1954,9 +1954,29 @@
             const showOnHome = document.getElementById('news-show-home').checked;
             const readingTime = document.getElementById('news-reading-time').value;
             
-            const image = imageUrl || (currentMediaFiles.length > 0 && currentMediaFiles[0].type.startsWith('image') ? currentMediaFiles[0].data : null);
-            
             let newsList = getNews();
+
+            // If primary cover image url is empty, automatically find the first image in currentMediaFiles
+            let image = imageUrl ? imageUrl.trim() : "";
+            if (!image) {
+                const firstLocalImageObj = currentMediaFiles.find(f => 
+                    (f.type && f.type.startsWith('image')) || 
+                    (f.data && f.data.startsWith('data:image')) ||
+                    (f.data && (f.data.startsWith('/uploads/') || f.data.startsWith('http')))
+                );
+                if (firstLocalImageObj) {
+                    image = firstLocalImageObj.data;
+                }
+            }
+            
+            // If still empty and we are editing, fallback to existing image
+            if (!image && id) {
+                const existingNews = newsList.find(n => n.id === id);
+                if (existingNews && existingNews.image) {
+                    image = existingNews.image;
+                }
+            }
+            
             if (id) {
                 const idx = newsList.findIndex(n => n.id === id);
                 if (idx !== -1) {
