@@ -452,7 +452,7 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
   }
   if (Array.isArray(item.media)) {
     item.media.forEach((m: any) => {
-      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('image/') && m.data && !images.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && (m.type.startsWith('image/') || m.type === 'image') && m.data && !images.includes(m.data)) {
         images.push(m.data);
       }
     });
@@ -468,7 +468,7 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
   }
   if (Array.isArray(item.media)) {
     item.media.forEach((m: any) => {
-      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') && m.data && !videos.includes(m.data)) {
+      if (m && m.type && typeof m.type === 'string' && (m.type.startsWith('video/') || m.type === 'video') && m.data && !videos.includes(m.data)) {
         videos.push(m.data);
       }
     });
@@ -2682,10 +2682,10 @@ export default function App() {
                                  <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                               ) : (
                                  <img 
-                                   src={m && m.data ? m.data : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                   src={m && m.data ? m.data : (item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80")} 
                                    alt={item.title} 
                                    onError={(e) => {
-                                     e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                     e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                                    }}
                                    className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                                  />
@@ -2706,7 +2706,7 @@ export default function App() {
                             src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
                             alt={item.title} 
                             onError={(e) => {
-                              e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                              e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                             }}
                             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                           />
@@ -3632,10 +3632,10 @@ export default function App() {
                             <div className="absolute inset-0 bg-neutral-950">
                               {item.media && item.media.length > 0 ? (
                                 <img 
-                                  src={item.media[0].data} 
+                                  src={item.media[0].data || (item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80")} 
                                   alt={item.title} 
                                   onError={(e) => {
-                                    e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                    e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                                   }}
                                   className="w-full h-full object-contain opacity-100 transition-transform duration-[10000ms] ease-out"
                                 />
@@ -3644,7 +3644,7 @@ export default function App() {
                                   src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
                                   alt={item.title} 
                                   onError={(e) => {
-                                    e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                    e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                                   }}
                                   className="w-full h-full object-contain opacity-100 transition-transform duration-[10000ms] ease-out"
                                 />
@@ -3800,10 +3800,10 @@ export default function App() {
                                            <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                         ) : (
                                            <img 
-                                             src={m && m.data ? m.data : "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
+                                             src={m && m.data ? m.data : (item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80")} 
                                              alt={item.title} 
                                              onError={(e) => {
-                                               e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                               e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                                              }}
                                              className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                                            />
@@ -3824,7 +3824,7 @@ export default function App() {
                                       src={item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80"} 
                                       alt={item.title} 
                                       onError={(e) => {
-                                        e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
+                                        e.currentTarget.src = item.image || "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                                       }}
                                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
                                     />
