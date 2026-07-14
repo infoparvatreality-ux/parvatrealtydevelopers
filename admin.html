@@ -4718,6 +4718,51 @@ Source: ${source}`;
             tableBody.innerHTML = html;
         };
 
+        // Fetch and bind live analytics stats dynamically to the dashboard stats components
+        window.updateAnalyticsDashboard = function() {
+            const sessionStr = sessionStorage.getItem('parvat_admin_session');
+            if (!sessionStr) return;
+
+            try {
+                const sessionData = JSON.parse(sessionStr);
+                const token = sessionData.token || 'secure_admin_session_token_998877';
+                const email = sessionData.email || 'omkarwanve7@gmail.com';
+
+                fetch('/api.php?action=analytics', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'X-Admin-Email': email
+                    }
+                })
+                .then(res => {
+                    if (res.status === 401) {
+                        sessionStorage.removeItem('parvat_admin_session');
+                        window.location.href = 'login.html';
+                        throw new Error("Unauthorized");
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data && data.success && data.stats) {
+                        const stats = data.stats;
+                        
+                        const liveEl = document.getElementById('stat-live-users');
+                        const totalEl = document.getElementById('stat-total-visits');
+                        const trafficEl = document.getElementById('stat-daily-traffic');
+
+                        if (liveEl) liveEl.innerText = stats.liveUsers.toLocaleString();
+                        if (totalEl) totalEl.innerText = stats.totalVisits.toLocaleString();
+                        if (trafficEl) trafficEl.innerText = stats.dailyTraffic.toLocaleString();
+                    }
+                })
+                .catch(err => {
+                    console.warn("Analytics fetch error:", err);
+                });
+            } catch (e) {
+                console.error("Analytics parsing error:", e);
+            }
+        };
+
         // Initialize all controls on start
         function initAllControls() {
             initWhatsAppSettings();
@@ -4739,6 +4784,10 @@ Source: ${source}`;
             renderSeoPageSelector();
             loadSeoPageSettings();
             renderSeoPagesTable();
+
+            // Analytics Dashboard Updater
+            window.updateAnalyticsDashboard();
+            setInterval(window.updateAnalyticsDashboard, 10000);
         }
 
         initAllControls();

@@ -1298,6 +1298,41 @@ export default function App() {
     }
   }, [newsCategories, selectedNewsCategory]);
 
+  // Analytics Tracking Effect
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Get or generate unique session ID
+    let sessionId = sessionStorage.getItem('parvat_visitor_session_id');
+    if (!sessionId) {
+      sessionId = 'sess_' + Math.random().toString(36).substring(2, 15) + '_' + Date.now();
+      sessionStorage.setItem('parvat_visitor_session_id', sessionId);
+    }
+
+    const trackPageview = () => {
+      // Send tracking request using standard fetch
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          sessionId,
+          page: activePage,
+          path: window.location.pathname
+        })
+      }).catch(e => console.warn('Analytics tracking error:', e));
+    };
+
+    // Track on initial load and page changes
+    trackPageview();
+
+    // Setup heartbeat interval (every 30 seconds)
+    const interval = setInterval(trackPageview, 30000);
+
+    return () => clearInterval(interval);
+  }, [activePage]);
+
   // Navigate function with dynamic routing using pushState and hash fallback
   const navigateTo = (page: string, id?: string) => {
     setActivePage(page);
@@ -3903,7 +3938,10 @@ export default function App() {
                   CBD Belapur, Navi Mumbai, Maharashtra 400614
                 </p>
                 <div className="space-y-3 text-xs font-mono pt-4 border-t border-neutral-800">
-                  <p className="text-amber-400">📞 Phone: +91 85916 68166</p>
+                  <div className="space-y-1">
+                    <p className="text-amber-400">📞 Phone 1: +91 85916 68166</p>
+                    <p className="text-amber-400">📞 Phone 2: +91 85918 18166</p>
+                  </div>
                   <p className="text-amber-400">✉️ Email: Info.parvatreality@gmail.com</p>
                 </div>
               </div>
@@ -4315,12 +4353,6 @@ export default function App() {
               <p className="text-white/90 text-xs font-light leading-relaxed">
                 Parvat Reality and Developers is a premier land consolidation and plotted development brand. Over 18 years, we have delivered secure, legally vetted, clear-title agricultural and NA acreage.
               </p>
-
-              <div className="pt-2">
-                <p className="text-white/60 text-[11px] font-mono leading-relaxed">
-                  CIN: U45200MH2008PTC188554
-                </p>
-              </div>
 
               {/* White Social Media Icons right under the logo block */}
               <div className="pt-4 border-t border-white/20 space-y-2.5">
