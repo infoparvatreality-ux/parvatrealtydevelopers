@@ -1931,7 +1931,10 @@ export default function App() {
                   className={`absolute inset-0 bg-cover bg-center transition-transform duration-[6000ms] ease-out ${
                     isActive ? 'scale-105' : 'scale-100'
                   }`}
-                  style={{ backgroundImage: `url('${slide.url}')` }}
+                  style={{ 
+                    backgroundImage: `url('${slide.url}')`,
+                    ...(index === 3 ? { backgroundColor: '#f1e6e6' } : {})
+                  }}
                 />
                 
                 {/* Dark Vignette and Gradient Overlay for Optimal Contrast */}
@@ -3362,14 +3365,17 @@ export default function App() {
             </div>
 
             {/* Call To Action Block */}
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-neutral-900 to-neutral-900/90 border border-neutral-800 p-8 md:p-12 text-center space-y-6 max-w-4xl mx-auto shadow-2xl">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.08),transparent_50%)]" />
+            <div 
+              className="relative rounded-2xl overflow-hidden p-8 md:p-12 text-center space-y-6 max-w-4xl mx-auto border-0 shadow-sm"
+              style={{ backgroundColor: '#f4f0f0' }}
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.06),transparent_50%)]" />
               <div className="relative space-y-3">
-                <span className="text-amber-500 text-xs font-bold tracking-[0.2em] uppercase block">JOIN OUR COMMUNITY</span>
-                <h3 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
+                <span className="text-amber-800 text-xs font-bold tracking-[0.2em] uppercase block">JOIN OUR COMMUNITY</span>
+                <h3 className="text-2xl md:text-3xl font-serif font-bold tracking-wide" style={{ color: '#0f172a' }}>
                   Be a Part of Our Future
                 </h3>
-                <p className="text-neutral-400 text-xs md:text-sm max-w-xl mx-auto leading-relaxed">
+                <p className="text-slate-700 text-xs md:text-sm max-w-xl mx-auto leading-relaxed font-normal">
                   Join our upcoming premium land launch summits or book a detailed physical tour of our landmark meadows.
                 </p>
               </div>
@@ -3377,7 +3383,7 @@ export default function App() {
               <div className="relative pt-2">
                 <button 
                   onClick={() => setIsAppointmentOpen(true)}
-                  className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs md:text-sm tracking-widest uppercase rounded-lg transition-all duration-300 shadow-lg cursor-pointer"
+                  className="px-8 py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs md:text-sm tracking-widest uppercase rounded-lg transition-all duration-300 shadow-md cursor-pointer"
                 >
                   Be a Part of Our Future
                 </button>
