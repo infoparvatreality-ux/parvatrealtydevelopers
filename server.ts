@@ -8,6 +8,7 @@ import fs from "fs";
 const NEWS_JSON_PATH = path.join(process.cwd(), "src", "data", "news.json");
 const LEADS_JSON_PATH = path.join(process.cwd(), "src", "data", "leads.json");
 const PROPERTIES_JSON_PATH = path.join(process.cwd(), "src", "data", "properties.json");
+const PAGE_VIEWS_JSON_PATH = path.join(process.cwd(), "src", "data", "page_views.json");
 
 // Helper: Ensure directories exist
 function ensureDataDirExists() {
@@ -208,6 +209,34 @@ function clearLeadsFile() {
   }
 }
 
+// Helper: Get Page Views from physical JSON
+function getPageViewsFromFile(): any[] {
+  ensureDataDirExists();
+  if (fs.existsSync(PAGE_VIEWS_JSON_PATH)) {
+    try {
+      const content = fs.readFileSync(PAGE_VIEWS_JSON_PATH, "utf8");
+      return JSON.parse(content);
+    } catch (e: any) {
+      console.error("Error reading page_views.json:", e.message);
+    }
+  }
+  return [];
+}
+
+// Helper: Save Page View to physical JSON
+function savePageViewToFile(view: any) {
+  ensureDataDirExists();
+  try {
+    const views = getPageViewsFromFile();
+    views.push(view);
+    fs.writeFileSync(PAGE_VIEWS_JSON_PATH, JSON.stringify(views, null, 2), "utf8");
+    return true;
+  } catch (e: any) {
+    console.error("Error writing page_views.json:", e.message);
+    return false;
+  }
+}
+
 // Create MySQL connection pool with Hostinger credentials
 const dbConfig = {
   host: process.env.DB_HOST || "localhost",
@@ -243,31 +272,83 @@ function cleanExpiredSessions() {
   }
 }
 
-function trackVisit(sessionId: string) {
+async function trackVisit(sessionId: string, page?: string, pathName?: string) {
   if (!sessionId) return;
   const now = Date.now();
-  activeSessions.set(sessionId, now);
+  const pageStr = page || "home";
+  const pathStr = pathName || "/";
   
-  allTimeUniqueVisits.add(sessionId);
+  activeSessions.set(sessionId, now);
 
-  const todayStr = new Date().toISOString().split('T')[0];
-  if (!dailyUniqueVisits.has(todayStr)) {
-    dailyUniqueVisits.set(todayStr, new Set<string>());
+  const newView = {
+    sessionId,
+    page: pageStr,
+    path: pathStr,
+    timestamp: new Date().toISOString()
+  };
+
+  if (process.env.DB_HOST && process.env.DB_HOST !== "localhost" && process.env.DB_HOST !== "127.0.0.1") {
+    try {
+      const connection = await pool.getConnection();
+      await connection.query(
+        "INSERT INTO page_views (session_id, page, path) VALUES (?, ?, ?)",
+        [sessionId, pageStr, pathStr]
+      );
+      connection.release();
+    } catch (e: any) {
+      console.warn("Could not save page view to MySQL, falling back to JSON file:", e.message);
+    }
   }
-  dailyUniqueVisits.get(todayStr)!.add(sessionId);
+
+  savePageViewToFile(newView);
 }
 
-function getAnalyticsStats(): AnalyticsStats {
+async function getAnalyticsStats(): Promise<AnalyticsStats> {
   cleanExpiredSessions();
   
-  const todayStr = new Date().toISOString().split('T')[0];
-  const dailySet = dailyUniqueVisits.get(todayStr);
-  const dailyCount = dailySet ? dailySet.size : 0;
+  let totalVisits = 0;
+  let dailyTraffic = 0;
+  let fetchedFromDB = false;
+
+  if (process.env.DB_HOST && process.env.DB_HOST !== "localhost" && process.env.DB_HOST !== "127.0.0.1") {
+    try {
+      const connection = await pool.getConnection();
+      
+      const [totalRows] = await connection.query("SELECT COUNT(*) as count FROM page_views");
+      totalVisits = (totalRows as any)[0].count;
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const [dailyRows] = await connection.query(
+        "SELECT COUNT(*) as count FROM page_views WHERE DATE(created_at) = ?",
+        [todayStr]
+      );
+      dailyTraffic = (dailyRows as any)[0].count;
+
+      connection.release();
+      fetchedFromDB = true;
+    } catch (error: any) {
+      console.warn("Database connection error inside getAnalyticsStats, using JSON fallback:", error.message);
+    }
+  }
+
+  if (!fetchedFromDB) {
+    const views = getPageViewsFromFile();
+    totalVisits = views.length;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    dailyTraffic = views.filter((v: any) => {
+      if (!v.timestamp) return false;
+      return v.timestamp.startsWith(todayStr);
+    }).length;
+  }
+
+  // Active unique sessions currently tracking in Map
+  const liveUsers = activeSessions.size;
 
   return {
-    liveUsers: activeSessions.size,
-    totalVisits: allTimeUniqueVisits.size,
-    dailyTraffic: dailyCount
+    liveUsers,
+    totalVisits,
+    dailyTraffic
   };
 }
 
@@ -281,7 +362,7 @@ async function initializeDatabase() {
   try {
     console.log("Initializing MySQL database connection...");
     const connection = await pool.getConnection();
-    console.log("Database connection established. Creating appointments table if not exists...");
+    console.log("Database connection established. Creating tables if not exist...");
     
     await connection.query(`
       CREATE TABLE IF NOT EXISTS appointments (
@@ -292,8 +373,18 @@ async function initializeDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
     `);
+
+    await connection.query(`
+      CREATE TABLE IF NOT EXISTS page_views (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        session_id VARCHAR(255) NOT NULL,
+        page VARCHAR(255) NOT NULL,
+        path VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
     
-    console.log("MySQL appointments table checked/created successfully.");
+    console.log("MySQL database tables checked/created successfully.");
     connection.release();
   } catch (error: any) {
     console.log("Database: External MySQL connection is currently not reachable. Sandbox mode active.");
@@ -310,17 +401,19 @@ async function startServer() {
   app.use(express.json());
 
   // API Route: Register analytics pageview / session heartbeat
-  app.post("/api/analytics/track", (req, res) => {
-    const { sessionId } = req.body;
+  app.post("/api/analytics/track", async (req, res) => {
+    const { sessionId, page, path: pathName } = req.body;
     if (sessionId) {
-      trackVisit(sessionId);
+      await trackVisit(sessionId, page, pathName);
     }
-    return res.json({ success: true, stats: getAnalyticsStats() });
+    const stats = await getAnalyticsStats();
+    return res.json({ success: true, stats });
   });
 
   // API Route: Get analytics stats
-  app.get("/api/analytics/stats", (req, res) => {
-    return res.json({ success: true, stats: getAnalyticsStats() });
+  app.get("/api/analytics/stats", async (req, res) => {
+    const stats = await getAnalyticsStats();
+    return res.json({ success: true, stats });
   });
 
   // API Route: Login proxy with strict verification for admin@parvatreality.com
@@ -419,13 +512,14 @@ async function startServer() {
   app.all("/api.php", async (req, res) => {
     const method = req.method;
     if (method === "POST") {
-      const { action, email, password, name, phone, details, sessionId } = req.body;
+      const { action, email, password, name, phone, details, sessionId, page, path: pathName } = req.body;
 
       if (action === "track_analytics") {
         if (sessionId) {
-          trackVisit(sessionId);
+          await trackVisit(sessionId, page, pathName);
         }
-        return res.json({ success: true, stats: getAnalyticsStats() });
+        const stats = await getAnalyticsStats();
+        return res.json({ success: true, stats });
       }
 
       // Handle server-side login identical to production PHP api.php behavior
@@ -583,7 +677,8 @@ async function startServer() {
 
       // Handle analytics request
       if (req.query.action === "analytics") {
-        return res.json({ success: true, stats: getAnalyticsStats() });
+        const stats = await getAnalyticsStats();
+        return res.json({ success: true, stats });
       }
 
       const authHeader = req.headers.authorization;

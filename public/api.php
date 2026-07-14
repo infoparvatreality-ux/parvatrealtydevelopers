@@ -47,47 +47,77 @@ function save_php_analytics($data) {
     file_put_contents($file, json_encode($data));
 }
 
-function track_php_visit($sessionId) {
+function track_php_visit($sessionId, $page = 'home', $path = '/') {
     if (!$sessionId) return;
     $now = time();
     $today = date('Y-m-d');
     
     $data = get_php_analytics();
-    
     $data['sessions'][$sessionId] = $now;
-    
-    if (!isset($data['all_time']) || !is_array($data['all_time'])) {
-        $data['all_time'] = [];
-    }
-    if (!in_array($sessionId, $data['all_time'])) {
-        $data['all_time'][] = $sessionId;
-    }
-    
-    if (!isset($data['daily']) || !is_array($data['daily'])) {
-        $data['daily'] = [];
-    }
-    if (!isset($data['daily'][$today]) || !is_array($data['daily'][$today])) {
-        $data['daily'][$today] = [];
-    }
-    if (!in_array($sessionId, $data['daily'][$today])) {
-        $data['daily'][$today][] = $sessionId;
-    }
-    
     save_php_analytics($data);
+
+    global $conn;
+    if ($conn && !$conn->connect_error) {
+        $stmt = $conn->prepare("INSERT INTO page_views (session_id, page, path) VALUES (?, ?, ?)");
+        if ($stmt) {
+            $stmt->bind_param("sss", $sessionId, $page, $path);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    $newView = [
+        'sessionId' => $sessionId,
+        'page' => $page,
+        'path' => $path,
+        'timestamp' => date('c')
+    ];
+    save_php_page_view($newView);
 }
 
 function get_php_stats() {
-    $data = get_php_analytics();
-    $today = date('Y-m-d');
+    global $conn;
     
-    $liveCount = isset($data['sessions']) ? count($data['sessions']) : 0;
-    $totalCount = isset($data['all_time']) ? count($data['all_time']) : 0;
-    $dailyCount = (isset($data['daily']) && isset($data['daily'][$today])) ? count($data['daily'][$today]) : 0;
-    
+    $totalVisits = 0;
+    $dailyTraffic = 0;
+    $fetchedFromDB = false;
+
+    if ($conn && !$conn->connect_error) {
+        $resTotal = $conn->query("SELECT COUNT(*) as count FROM page_views");
+        if ($resTotal) {
+            $rowTotal = $resTotal->fetch_assoc();
+            $totalVisits = (int)$rowTotal['count'];
+            
+            $today = date('Y-m-d');
+            $resDaily = $conn->query("SELECT COUNT(*) as count FROM page_views WHERE DATE(created_at) = '$today'");
+            if ($resDaily) {
+                $rowDaily = $resDaily->fetch_assoc();
+                $dailyTraffic = (int)$rowDaily['count'];
+                $fetchedFromDB = true;
+            }
+        }
+    }
+
+    if (!$fetchedFromDB) {
+        $views = get_php_page_views();
+        $totalVisits = count($views);
+
+        $today = date('Y-m-d');
+        $dailyTraffic = 0;
+        foreach ($views as $v) {
+            if (isset($v['timestamp']) && strpos($v['timestamp'], $today) === 0) {
+                $dailyTraffic++;
+            }
+        }
+    }
+
+    $analytics = get_php_analytics();
+    $liveUsers = isset($analytics['sessions']) ? count($analytics['sessions']) : 0;
+
     return [
-        'liveUsers' => $liveCount,
-        'totalVisits' => $totalCount,
-        'dailyTraffic' => $dailyCount
+        'liveUsers' => $liveUsers,
+        'totalVisits' => $totalVisits,
+        'dailyTraffic' => $dailyTraffic
     ];
 }
 
@@ -95,6 +125,28 @@ function get_php_stats() {
 define('NEWS_JSON_PATH', dirname(__DIR__) . '/src/data/news.json');
 define('LEADS_JSON_PATH', dirname(__DIR__) . '/src/data/leads.json');
 define('PROPERTIES_JSON_PATH', dirname(__DIR__) . '/src/data/properties.json');
+define('PAGE_VIEWS_JSON_PATH', dirname(__DIR__) . '/src/data/page_views.json');
+
+function get_php_page_views() {
+    $file = PAGE_VIEWS_JSON_PATH;
+    ensure_php_data_dir_exists($file);
+    if (file_exists($file)) {
+        $content = @file_get_contents($file);
+        $decoded = json_decode($content, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+    }
+    return [];
+}
+
+function save_php_page_view($view) {
+    $file = PAGE_VIEWS_JSON_PATH;
+    ensure_php_data_dir_exists($file);
+    $views = get_php_page_views();
+    $views[] = $view;
+    @file_put_contents($file, json_encode($views, JSON_PRETTY_PRINT));
+}
 
 function ensure_php_data_dir_exists($path = NEWS_JSON_PATH) {
     $dir = dirname($path);
@@ -376,6 +428,14 @@ $conn->query("CREATE TABLE IF NOT EXISTS appointments (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+$conn->query("CREATE TABLE IF NOT EXISTS page_views (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
+    page VARCHAR(255) NOT NULL,
+    path VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
@@ -387,8 +447,10 @@ if ($method === 'POST') {
     
     if ($action === 'track_analytics') {
         $sessionId = isset($input['sessionId']) ? trim($input['sessionId']) : '';
+        $page = isset($input['page']) ? trim($input['page']) : 'home';
+        $path = isset($input['path']) ? trim($input['path']) : '/';
         if (!empty($sessionId)) {
-            track_php_visit($sessionId);
+            track_php_visit($sessionId, $page, $path);
         }
         echo json_encode(["success" => true, "stats" => get_php_stats()]);
         exit();

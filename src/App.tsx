@@ -1404,12 +1404,13 @@ export default function App() {
 
     const trackPageview = () => {
       // Send tracking request using standard fetch
-      fetch('/api/analytics/track', {
+      fetch('/api.php', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          action: 'track_analytics',
           sessionId,
           page: activePage,
           path: window.location.pathname
@@ -2655,70 +2656,74 @@ export default function App() {
                 <p className="text-neutral-500 text-sm font-light">No announcements or news articles are currently published. Stay tuned for upcoming updates.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 md:gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 {allNews.filter((item: any) => item.status !== 'draft' && item.showOnHome !== false).map((item, index) => (
                   <div 
                     key={item.id}
                     onClick={() => navigateTo('news', item.id)}
                     style={{ animationDelay: `${index * 120}ms` }}
-                    className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-lg sm:rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
+                    className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between h-full overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
                   >
-                    {Array.isArray(item.media) && item.media.length > 0 ? (
-                      <div className="relative h-24 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
-                        {item.media.map((m: any, idx: number) => (
-                          <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                            {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
-                               <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
-                            ) : (
-                               <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                            )}
-                          </div>
-                        ))}
-                        {item.media.length > 1 && (
-                          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
-                             {item.media.map((_: any, idx: number) => (
-                                <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
-                             ))}
-                          </div>
-                        )}
-                      </div>
-                    ) : item.image ? (
-                      <div className="relative h-24 sm:h-48 w-full overflow-hidden">
-                        <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                        {item.videoLink && (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all">
-                            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
-                              <Play className="w-3 h-3 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
+                    <div className="flex-1 flex flex-col">
+                      {Array.isArray(item.media) && item.media.length > 0 ? (
+                        <div className="relative h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
+                          {item.media.map((m: any, idx: number) => (
+                            <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
+                              {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
+                                 <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
+                              ) : (
+                                 <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                              )}
                             </div>
+                          ))}
+                          {item.media.length > 1 && (
+                            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
+                               {item.media.map((_: any, idx: number) => (
+                                  <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
+                               ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : item.image ? (
+                        <div className="relative h-48 w-full overflow-hidden">
+                          <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                          {item.videoLink && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/15 transition-all">
+                              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-500 rounded-full flex items-center justify-center text-white group-hover:scale-110 transition-transform shadow-md">
+                                <Play className="w-3 h-3 sm:w-4.5 sm:h-4.5 ml-0.5 fill-current" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ) : null}
+                      <div className="p-5 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-[10px] font-mono text-neutral-500">
+                            <span>{item.date}</span>
+                            <span className="text-amber-500/80 uppercase truncate max-w-[120px]">{item.author}</span>
                           </div>
-                        )}
+                          <h4 className="text-sm sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">
+                            {item.title}
+                          </h4>
+                          <p className="text-neutral-400 text-xs font-light leading-relaxed line-clamp-3 sm:line-clamp-4">
+                            {item.snippet}
+                          </p>
+                        </div>
                       </div>
-                    ) : null}
-                    <div className="p-2 sm:p-6 space-y-2 sm:space-y-4 flex-1">
-                      <div className="flex items-center justify-between text-[8px] sm:text-[10px] font-mono text-neutral-500">
-                        <span>{item.date}</span>
-                        <span className="text-amber-500/80 uppercase truncate max-w-[50px] sm:max-w-none">{item.author}</span>
-                      </div>
-                      <h4 className="text-xs sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-1 sm:line-clamp-none">
-                        {item.title}
-                      </h4>
-                      <p className="text-neutral-400 text-[10px] sm:text-xs font-light leading-relaxed line-clamp-2 sm:line-clamp-none">
-                        {item.snippet}
-                      </p>
                     </div>
-                    <div className="p-2 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-2">
-                      <span className="text-[8px] sm:text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
-                      <div className="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto mt-1 sm:mt-0">
+                    <div className="p-4 sm:px-6 sm:py-4 mt-auto border-t border-neutral-900/50 flex items-center justify-between gap-2 bg-neutral-950/20">
+                      <span className="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">News Report</span>
+                      <div className="flex items-center gap-2">
                         <button 
                           onClick={(e) => { e.stopPropagation(); }} 
                           className="text-neutral-500 hover:text-amber-500 transition-colors p-1" 
                           title="Share" 
                           aria-label="Share"
                         >
-                          <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                          <Share2 className="w-4 h-4" />
                         </button>
                         <span 
-                          className="text-[9px] sm:text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-0.5 sm:gap-1"
+                          className="text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-1"
                         >
                           Read &rarr;
                         </span>
@@ -3745,7 +3750,7 @@ export default function App() {
                   }
 
                   return (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                       {(() => {
                         const elements: React.ReactNode[] = [];
                         const banners = getBanners().filter((b: any) => b.active === true || b.active === 'true');
@@ -3757,62 +3762,64 @@ export default function App() {
                               key={item.id} 
                               onClick={() => navigateTo('news', item.id)}
                               style={{ animationDelay: `${index * 120}ms` }}
-                              className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
+                              className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col justify-between h-full overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
-                              {Array.isArray(item.media) && item.media.length > 0 ? (
-                                <div className="relative h-28 sm:h-36 md:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
-                                  {item.media.map((m: any, idx: number) => (
-                                    <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                                      {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
-                                         <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
-                                      ) : (
-                                         <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                      )}
-                                    </div>
-                                  ))}
-                                  {item.media.length > 1 && (
-                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
-                                       {item.media.map((_: any, idx: number) => (
-                                          <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
-                                       ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : item.image ? (
-                                <div className="relative h-28 sm:h-36 md:h-48 w-full overflow-hidden">
-                                  <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                  {item.videoLink && (
-                                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1.5">
-                                      <Play className="w-4 h-4 text-amber-500" />
-                                    </div>
-                                  )}
-                                </div>
-                              ) : null}
-                              <div className="p-3 sm:p-4 md:p-6 space-y-2.5 sm:space-y-4 flex-1 flex flex-col justify-between">
-                                <div className="space-y-1.5 sm:space-y-3">
-                                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                                    {item.pinned && (
-                                      <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-400 bg-amber-400/15 border border-amber-400/30 rounded animate-pulse">
-                                        📌 PINNED
-                                      </span>
+                              <div className="flex-1 flex flex-col">
+                                {Array.isArray(item.media) && item.media.length > 0 ? (
+                                  <div className="relative h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
+                                    {item.media.map((m: any, idx: number) => (
+                                      <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
+                                        {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
+                                           <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
+                                        ) : (
+                                           <img src={m ? m.data : ''} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                        )}
+                                      </div>
+                                    ))}
+                                    {item.media.length > 1 && (
+                                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
+                                         {item.media.map((_: any, idx: number) => (
+                                            <div key={idx} className="w-1.5 h-1.5 rounded-full bg-white/70 shadow-sm" />
+                                         ))}
+                                      </div>
                                     )}
-                                    {item.category && (
-                                      <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-200 rounded">
-                                        🏷️ {item.category}
-                                      </span>
-                                    )}
-                                    <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded">
-                                      ⏱️ {item.readingTime || '2 min read'}
-                                    </span>
                                   </div>
-                                  <h3 className="text-xs sm:text-sm md:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">{item.title}</h3>
-                                  <p className="text-neutral-400 text-[10px] sm:text-xs font-light leading-relaxed line-clamp-2 md:line-clamp-3">{item.snippet}</p>
+                                ) : item.image ? (
+                                  <div className="relative h-48 w-full overflow-hidden">
+                                    <img src={item.image} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                    {item.videoLink && (
+                                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1.5">
+                                        <Play className="w-4 h-4 text-amber-500" />
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : null}
+                                <div className="p-5 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col justify-between">
+                                  <div className="space-y-2">
+                                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                                      {item.pinned && (
+                                        <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-400 bg-amber-400/15 border border-amber-400/30 rounded animate-pulse">
+                                          📌 PINNED
+                                        </span>
+                                      )}
+                                      {item.category && (
+                                        <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-200 rounded">
+                                          🏷️ {item.category}
+                                        </span>
+                                      )}
+                                      <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded">
+                                        ⏱️ {item.readingTime || '2 min read'}
+                                      </span>
+                                    </div>
+                                    <h3 className="text-sm sm:text-base font-serif font-bold text-white group-hover:text-amber-400 transition-colors leading-snug line-clamp-2">{item.title}</h3>
+                                    <p className="text-neutral-400 text-xs font-light leading-relaxed line-clamp-3 sm:line-clamp-4">{item.snippet}</p>
+                                  </div>
                                 </div>
-                                <div className="flex items-center justify-end pt-2 sm:pt-4 mt-auto border-t border-neutral-800/50">
-                                  <span className="text-[10px] sm:text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-1">
-                                    Read Article &rarr;
-                                  </span>
-                                </div>
+                              </div>
+                              <div className="p-4 sm:px-6 sm:py-4 mt-auto border-t border-neutral-800/50 flex items-center justify-end bg-neutral-950/20">
+                                <span className="text-xs text-amber-500 font-bold group-hover:underline flex items-center gap-1">
+                                  Read Article &rarr;
+                                </span>
                               </div>
                             </div>
                           );
