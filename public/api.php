@@ -96,17 +96,20 @@ define('NEWS_JSON_PATH', dirname(__DIR__) . '/src/data/news.json');
 define('LEADS_JSON_PATH', dirname(__DIR__) . '/src/data/leads.json');
 define('PROPERTIES_JSON_PATH', dirname(__DIR__) . '/src/data/properties.json');
 
-function ensure_php_data_dir_exists() {
-    $dir = dirname(NEWS_JSON_PATH);
+function ensure_php_data_dir_exists($path = NEWS_JSON_PATH) {
+    $dir = dirname($path);
     if (!file_exists($dir)) {
-        mkdir($dir, 0755, true);
+        if (!@mkdir($dir, 0755, true)) {
+            return false;
+        }
     }
+    return is_writable($dir);
 }
 
 function get_properties_from_file() {
-    ensure_php_data_dir_exists();
+    ensure_php_data_dir_exists(PROPERTIES_JSON_PATH);
     if (file_exists(PROPERTIES_JSON_PATH)) {
-        $content = file_get_contents(PROPERTIES_JSON_PATH);
+        $content = @file_get_contents(PROPERTIES_JSON_PATH);
         $decoded = json_decode($content, true);
         if (is_array($decoded)) {
             return $decoded;
@@ -133,16 +136,25 @@ function save_base64_file($base64Data, $prefix) {
             $filename = $prefix . '_' . time() . '_' . rand(100, 999) . '.' . $ext;
             $uploadsDir = dirname(__FILE__) . '/uploads';
             if (!file_exists($uploadsDir)) {
-                mkdir($uploadsDir, 0755, true);
+                if (!@mkdir($uploadsDir, 0755, true)) {
+                    error_log("Failed to create uploads directory: " . $uploadsDir);
+                    return null;
+                }
+            }
+            if (!is_writable($uploadsDir)) {
+                error_log("Uploads directory is not writable: " . $uploadsDir);
+                return null;
             }
             $filePath = $uploadsDir . '/' . $filename;
             
-            if (file_put_contents($filePath, $data) !== false) {
+            if (@file_put_contents($filePath, $data) !== false) {
                 return '/uploads/' . $filename;
+            } else {
+                error_log("Failed to write base64 file data to: " . $filePath);
             }
         }
     } catch (Exception $e) {
-        // Ignored
+        error_log("save_base64_file error: " . $e->getMessage());
     }
     return null;
 }
@@ -178,7 +190,13 @@ function process_property_media_and_urls(&$property) {
 }
 
 function save_properties_to_file($properties) {
-    ensure_php_data_dir_exists();
+    if (!ensure_php_data_dir_exists(PROPERTIES_JSON_PATH)) {
+        $dir = dirname(PROPERTIES_JSON_PATH);
+        return [
+            "success" => false,
+            "error" => "Directory missing or not writable: " . $dir . ". Please check folder permissions."
+        ];
+    }
     if (is_array($properties)) {
         foreach ($properties as &$p) {
             process_property_media_and_urls($p);
@@ -186,13 +204,28 @@ function save_properties_to_file($properties) {
     } else {
         $properties = [];
     }
-    return file_put_contents(PROPERTIES_JSON_PATH, json_encode($properties, JSON_PRETTY_PRINT)) !== false;
+    
+    $json_content = json_encode($properties, JSON_PRETTY_PRINT);
+    if ($json_content === false) {
+        return [
+            "success" => false,
+            "error" => "JSON encoding error: Failed to serialize properties data."
+        ];
+    }
+
+    if (@file_put_contents(PROPERTIES_JSON_PATH, $json_content) === false) {
+        return [
+            "success" => false,
+            "error" => "Failed to write properties data to properties.json. Check file/folder write permissions."
+        ];
+    }
+    return ["success" => true];
 }
 
 function get_news_ecosystem_from_file() {
-    ensure_php_data_dir_exists();
+    ensure_php_data_dir_exists(NEWS_JSON_PATH);
     if (file_exists(NEWS_JSON_PATH)) {
-        $content = file_get_contents(NEWS_JSON_PATH);
+        $content = @file_get_contents(NEWS_JSON_PATH);
         $decoded = json_decode($content, true);
         if ($decoded) {
             return $decoded;
@@ -209,15 +242,79 @@ function get_news_ecosystem_from_file() {
     ];
 }
 
+function process_news_media_and_urls(&$news_item) {
+    // Handle main image
+    if (isset($news_item['image']) && strpos($news_item['image'], 'data:') === 0) {
+        $relativePath = save_base64_file($news_item['image'], 'news_main');
+        if ($relativePath) {
+            $news_item['image'] = $relativePath;
+        }
+    }
+
+    // Handle main video
+    if (isset($news_item['videoLink']) && strpos($news_item['videoLink'], 'data:') === 0) {
+        $relativePath = save_base64_file($news_item['videoLink'], 'news_video');
+        if ($relativePath) {
+            $news_item['videoLink'] = $relativePath;
+        }
+    }
+
+    // Handle media gallery items
+    if (isset($news_item['media']) && is_array($news_item['media'])) {
+        foreach ($news_item['media'] as $idx => &$med) {
+            if (isset($med['data']) && strpos($med['data'], 'data:') === 0) {
+                $relativePath = save_base64_file($med['data'], 'news_gallery_' . $idx);
+                if ($relativePath) {
+                    $med['data'] = $relativePath;
+                }
+            }
+        }
+    }
+}
+
 function save_news_ecosystem_to_file($data) {
-    ensure_php_data_dir_exists();
-    return file_put_contents(NEWS_JSON_PATH, json_encode($data, JSON_PRETTY_PRINT)) !== false;
+    if (!ensure_php_data_dir_exists(NEWS_JSON_PATH)) {
+        $dir = dirname(NEWS_JSON_PATH);
+        return [
+            "success" => false,
+            "error" => "Directory missing or not writable: " . $dir . ". Please check folder permissions."
+        ];
+    }
+
+    if (isset($data['news']) && is_array($data['news'])) {
+        foreach ($data['news'] as &$item) {
+            process_news_media_and_urls($item);
+        }
+    }
+
+    if (isset($data['hero']['image']) && strpos($data['hero']['image'], 'data:') === 0) {
+        $relativePath = save_base64_file($data['hero']['image'], 'news_hero');
+        if ($relativePath) {
+            $data['hero']['image'] = $relativePath;
+        }
+    }
+
+    $json_content = json_encode($data, JSON_PRETTY_PRINT);
+    if ($json_content === false) {
+        return [
+            "success" => false,
+            "error" => "JSON encoding error: Failed to serialize news ecosystem data."
+        ];
+    }
+
+    if (@file_put_contents(NEWS_JSON_PATH, $json_content) === false) {
+        return [
+            "success" => false,
+            "error" => "Failed to write news ecosystem data to news.json. Check file/folder write permissions."
+        ];
+    }
+    return ["success" => true];
 }
 
 function get_leads_from_file() {
-    ensure_php_data_dir_exists();
+    ensure_php_data_dir_exists(LEADS_JSON_PATH);
     if (file_exists(LEADS_JSON_PATH)) {
-        $content = file_get_contents(LEADS_JSON_PATH);
+        $content = @file_get_contents(LEADS_JSON_PATH);
         $decoded = json_decode($content, true);
         if (is_array($decoded)) {
             return $decoded;
@@ -227,14 +324,18 @@ function get_leads_from_file() {
 }
 
 function save_lead_to_file($lead) {
-    ensure_php_data_dir_exists();
+    if (!ensure_php_data_dir_exists(LEADS_JSON_PATH)) {
+        return false;
+    }
     $leads = get_leads_from_file();
     array_unshift($leads, $lead);
-    return file_put_contents(LEADS_JSON_PATH, json_encode($leads, JSON_PRETTY_PRINT)) !== false;
+    return @file_put_contents(LEADS_JSON_PATH, json_encode($leads, JSON_PRETTY_PRINT)) !== false;
 }
 
 function delete_lead_from_file($id) {
-    ensure_php_data_dir_exists();
+    if (!ensure_php_data_dir_exists(LEADS_JSON_PATH)) {
+        return false;
+    }
     $leads = get_leads_from_file();
     $filtered = [];
     foreach ($leads as $l) {
@@ -242,12 +343,14 @@ function delete_lead_from_file($id) {
             $filtered[] = $l;
         }
     }
-    return file_put_contents(LEADS_JSON_PATH, json_encode($filtered, JSON_PRETTY_PRINT)) !== false;
+    return @file_put_contents(LEADS_JSON_PATH, json_encode($filtered, JSON_PRETTY_PRINT)) !== false;
 }
 
 function clear_leads_file() {
-    ensure_php_data_dir_exists();
-    return file_put_contents(LEADS_JSON_PATH, json_encode([], JSON_PRETTY_PRINT)) !== false;
+    if (!ensure_php_data_dir_exists(LEADS_JSON_PATH)) {
+        return false;
+    }
+    return @file_put_contents(LEADS_JSON_PATH, json_encode([], JSON_PRETTY_PRINT)) !== false;
 }
 
 // Hostinger Database connection credentials (embedded securely for Hostinger's environment)
@@ -330,17 +433,18 @@ if ($method === 'POST') {
             "image" => null
         ];
 
-        $success = save_news_ecosystem_to_file([
+        $result = save_news_ecosystem_to_file([
             "news" => $news,
             "categories" => $categories,
             "hero" => $hero
         ]);
 
-        if ($success) {
+        if (is_array($result) && isset($result['success']) && $result['success'] === true) {
             echo json_encode(["success" => true, "message" => "Ecosystem news data saved dynamically into news.json."]);
         } else {
+            $err_msg = (is_array($result) && isset($result['error'])) ? $result['error'] : "Failed to save ecosystem news data.";
             http_response_code(500);
-            echo json_encode(["success" => false, "error" => "Failed to save ecosystem news data."]);
+            echo json_encode(["success" => false, "error" => $err_msg]);
         }
         exit();
     }
@@ -357,14 +461,15 @@ if ($method === 'POST') {
 
         $properties = isset($input['properties']) ? $input['properties'] : [];
 
-        $success = save_properties_to_file($properties);
+        $result = save_properties_to_file($properties);
 
-        if ($success) {
+        if (is_array($result) && isset($result['success']) && $result['success'] === true) {
             $saved_properties = get_properties_from_file();
             echo json_encode(["success" => true, "message" => "Properties saved dynamically into properties.json.", "properties" => $saved_properties]);
         } else {
+            $err_msg = (is_array($result) && isset($result['error'])) ? $result['error'] : "Failed to save properties.";
             http_response_code(500);
-            echo json_encode(["success" => false, "error" => "Failed to save properties."]);
+            echo json_encode(["success" => false, "error" => $err_msg]);
         }
         exit();
     }
