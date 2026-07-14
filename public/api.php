@@ -84,15 +84,10 @@ function get_php_stats() {
     $totalCount = isset($data['all_time']) ? count($data['all_time']) : 0;
     $dailyCount = (isset($data['daily']) && isset($data['daily'][$today])) ? count($data['daily'][$today]) : 0;
     
-    // Baselines for high visual appeal
-    $baseLive = 14 + rand(0, 3);
-    $baseTotal = 14832;
-    $baseDaily = 345;
-    
     return [
-        'liveUsers' => max(1, $liveCount + $baseLive),
-        'totalVisits' => $totalCount + $baseTotal,
-        'dailyTraffic' => $dailyCount + $baseDaily
+        'liveUsers' => $liveCount,
+        'totalVisits' => $totalCount,
+        'dailyTraffic' => $dailyCount
     ];
 }
 
@@ -154,6 +149,60 @@ if ($method === 'POST') {
         } else {
             http_response_code(401);
             echo json_encode(["success" => false, "error" => "Invalid admin email or password."]);
+        }
+        exit();
+    }
+    
+    if ($action === 'delete_lead') {
+        $authHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+        $adminEmail = isset($_SERVER['HTTP_X_ADMIN_EMAIL']) ? $_SERVER['HTTP_X_ADMIN_EMAIL'] : '';
+        
+        if (($adminEmail !== "info.parvatreality@gmail.com" && $adminEmail !== "omkarwanve7@gmail.com") || $authHeader !== "Bearer secure_admin_session_token_998877") {
+            http_response_code(401);
+            echo json_encode(["success" => false, "error" => "Access Denied: Unauthorized admin session."]);
+            exit();
+        }
+
+        $id = isset($input['id']) ? (int)$input['id'] : 0;
+        if ($id > 0) {
+            $stmt = $conn->prepare("DELETE FROM appointments WHERE id = ?");
+            if ($stmt) {
+                $stmt->bind_param("i", $id);
+                if ($stmt->execute()) {
+                    echo json_encode(["success" => true, "message" => "Lead deleted successfully."]);
+                } else {
+                    echo json_encode(["success" => false, "error" => "Failed to delete lead: " . $stmt->error]);
+                }
+                $stmt->close();
+            } else {
+                echo json_encode(["success" => false, "error" => "Failed to prepare delete statement."]);
+            }
+        } else {
+            echo json_encode(["success" => false, "error" => "Invalid ID."]);
+        }
+        exit();
+    }
+
+    if ($action === 'clear_all_leads') {
+        $authHeader = isset($_SERVER['HTTP_AUTHORIZATION']) ? $_SERVER['HTTP_AUTHORIZATION'] : '';
+        $adminEmail = isset($_SERVER['HTTP_X_ADMIN_EMAIL']) ? $_SERVER['HTTP_X_ADMIN_EMAIL'] : '';
+        
+        if (($adminEmail !== "info.parvatreality@gmail.com" && $adminEmail !== "omkarwanve7@gmail.com") || $authHeader !== "Bearer secure_admin_session_token_998877") {
+            http_response_code(401);
+            echo json_encode(["success" => false, "error" => "Access Denied: Unauthorized admin session."]);
+            exit();
+        }
+
+        $sql = "TRUNCATE TABLE appointments";
+        if ($conn->query($sql)) {
+            echo json_encode(["success" => true, "message" => "All leads cleared successfully."]);
+        } else {
+            $sql = "DELETE FROM appointments";
+            if ($conn->query($sql)) {
+                echo json_encode(["success" => true, "message" => "All leads cleared successfully."]);
+            } else {
+                echo json_encode(["success" => false, "error" => "Failed to clear leads: " . $conn->error]);
+            }
         }
         exit();
     }

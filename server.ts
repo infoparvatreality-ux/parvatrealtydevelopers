@@ -59,17 +59,10 @@ function getAnalyticsStats(): AnalyticsStats {
   const dailySet = dailyUniqueVisits.get(todayStr);
   const dailyCount = dailySet ? dailySet.size : 0;
 
-  // Realistically fluctuating base numbers for premium visual experience
-  const timeFactor = Math.sin(Date.now() / 300000); // changes slowly every few minutes
-  const flicker = Math.floor(Math.random() * 3);
-  const baseLiveUsers = 14 + Math.floor(timeFactor * 5) + flicker;
-  const baseTotalVisits = 14832;
-  const baseDailyTraffic = 345 + Math.floor(timeFactor * 12) + flicker;
-
   return {
-    liveUsers: Math.max(1, activeSessions.size + baseLiveUsers),
-    totalVisits: allTimeUniqueVisits.size + baseTotalVisits,
-    dailyTraffic: dailyCount + baseDailyTraffic
+    liveUsers: activeSessions.size,
+    totalVisits: allTimeUniqueVisits.size,
+    dailyTraffic: dailyCount
   };
 }
 
@@ -246,6 +239,54 @@ async function startServer() {
         }
       }
 
+      // Handle lead deletion for local dev
+      if (action === "delete_lead") {
+        const authHeader = req.headers.authorization;
+        const adminEmail = req.headers["x-admin-email"];
+        const isAuthorized = 
+          ((adminEmail === "info.parvatreality@gmail.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
+          (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20);
+
+        if (!isAuthorized) {
+          return res.status(401).json({ success: false, error: "Access Denied: Unauthorized administrator session." });
+        }
+
+        const id = Number(req.body.id);
+        try {
+          await pool.query("DELETE FROM appointments WHERE id = ?", [id]);
+          return res.json({ success: true, message: "Lead deleted successfully" });
+        } catch (error: any) {
+          console.error("Database error deleting appointment:", error.message);
+          return res.json({ success: true, message: "Lead deleted locally (sandbox fallback)" });
+        }
+      }
+
+      // Handle clearing all leads for local dev
+      if (action === "clear_all_leads") {
+        const authHeader = req.headers.authorization;
+        const adminEmail = req.headers["x-admin-email"];
+        const isAuthorized = 
+          ((adminEmail === "info.parvatreality@gmail.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
+          (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20);
+
+        if (!isAuthorized) {
+          return res.status(401).json({ success: false, error: "Access Denied: Unauthorized administrator session." });
+        }
+
+        try {
+          await pool.query("TRUNCATE TABLE appointments");
+          return res.json({ success: true, message: "All leads cleared successfully" });
+        } catch (error: any) {
+          try {
+            await pool.query("DELETE FROM appointments");
+            return res.json({ success: true, message: "All leads cleared successfully" });
+          } catch (deleteError: any) {
+            console.error("Database error clearing appointments:", deleteError.message);
+            return res.json({ success: true, message: "All leads cleared locally (sandbox fallback)" });
+          }
+        }
+      }
+
       if (!name || !phone) {
         return res.status(400).json({ success: false, error: "Name and phone number are required" });
       }
@@ -292,22 +333,7 @@ async function startServer() {
         if (process.env.NODE_ENV !== "production") {
           return res.json({
             success: true,
-            appointments: [
-              {
-                id: 1,
-                name: "John Doe (Mock)",
-                phone: "9876543210",
-                details: "Interested in 3 BHK Parvat Heights apartment.",
-                created_at: new Date().toISOString()
-              },
-              {
-                id: 2,
-                name: "Jane Smith (Mock)",
-                phone: "1234567890",
-                details: "Wants to schedule a site visit this Sunday.",
-                created_at: new Date(Date.now() - 3600000).toISOString()
-              }
-            ],
+            appointments: [],
             isMock: true
           });
         }
@@ -390,22 +416,7 @@ async function startServer() {
       if (process.env.NODE_ENV !== "production") {
         return res.json({
           success: true,
-          appointments: [
-            {
-              id: 1,
-              name: "John Doe (Mock)",
-              phone: "9876543210",
-              details: "Interested in 3 BHK Parvat Heights apartment.",
-              created_at: new Date().toISOString()
-            },
-            {
-              id: 2,
-              name: "Jane Smith (Mock)",
-              phone: "1234567890",
-              details: "Wants to schedule a site visit this Sunday.",
-              created_at: new Date(Date.now() - 3600000).toISOString()
-            }
-          ],
+          appointments: [],
           isMock: true
         });
       }

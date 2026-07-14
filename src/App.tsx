@@ -798,7 +798,10 @@ export default function App() {
   const [allNews, setAllNews] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
       try {
-        localStorage.removeItem('parvat_news');
+        const saved = localStorage.getItem('parvat_news');
+        if (saved) {
+          return JSON.parse(saved);
+        }
       } catch (e) {}
     }
     return [];

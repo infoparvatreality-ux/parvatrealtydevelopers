@@ -1461,11 +1461,7 @@
     <script>
         // Core workspace scripts can be initialized here
         // --- NEWS MODULE LOGIC ---
-        const SAMPLE_NEWS = [
-          { id: "n1", title: "Parvat Reality Announces Upcoming Premium Navi Mumbai Land Launch", date: "June 28, 2026", author: "Sales Desk", snippet: "Expanding our greenfield residential luxury landscape footprint with a fresh 40-acre premium project in the booming Navi Mumbai region.", category: "Land Launches", featured: true, readingTime: "3 min read", showOnHome: true },
-          { id: "n2", title: "Land Appreciation Rates Soaring in Navi Mumbai Corridors", date: "June 15, 2026", author: "Economic Times (Repr.)", snippet: "With the airport phase completion near, developers report record land inquiries for commercial and logistics plots.", category: "Market Updates", featured: true, readingTime: "2 min read", showOnHome: true },
-          { id: "n3", title: "How Legal Vetting Is Transforming Land Purchases In West Region", date: "May 30, 2026", author: "Parvat Editorial", snippet: "Clear-title verified certificates and transparent digital boundaries have become the absolute standard for premium investors.", category: "Corporate News", featured: true, readingTime: "4 min read", showOnHome: true }
-        ];
+        const SAMPLE_NEWS = [];
 
         function getNews() {
             const str = localStorage.getItem('parvat_news');
@@ -4572,6 +4568,41 @@
                 const leads = window.getLeads();
                 const filtered = leads.filter(l => l.id !== id);
                 window.saveLeads(filtered);
+
+                // Call backend to permanently delete
+                const sessionStr = sessionStorage.getItem('parvat_admin_session');
+                if (sessionStr) {
+                    try {
+                        const sessionData = JSON.parse(sessionStr);
+                        const token = sessionData.token || 'secure_admin_session_token_998877';
+                        const email = sessionData.email || 'omkarwanve7@gmail.com';
+                        
+                        // Extract numeric ID if prefixed with db_
+                        const dbId = id.startsWith('db_') ? id.slice(3) : id;
+                        
+                        fetch('/api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                                'X-Admin-Email': email
+                            },
+                            body: JSON.stringify({
+                                action: 'delete_lead',
+                                id: dbId
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(resData => {
+                            console.log("Delete lead from DB response:", resData);
+                        })
+                        .catch(err => {
+                            console.error("Failed to delete lead from server:", err);
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
         };
 
@@ -4627,6 +4658,37 @@ Source: ${source}`;
         window.clearAllLeads = function() {
             if (confirm("WARNING: Are you sure you want to delete ALL captured leads? This action cannot be undone.")) {
                 window.saveLeads([]);
+
+                // Call backend to clear all leads permanently
+                const sessionStr = sessionStorage.getItem('parvat_admin_session');
+                if (sessionStr) {
+                    try {
+                        const sessionData = JSON.parse(sessionStr);
+                        const token = sessionData.token || 'secure_admin_session_token_998877';
+                        const email = sessionData.email || 'omkarwanve7@gmail.com';
+                        
+                        fetch('/api.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`,
+                                'X-Admin-Email': email
+                            },
+                            body: JSON.stringify({
+                                action: 'clear_all_leads'
+                            })
+                        })
+                        .then(res => res.json())
+                        .then(resData => {
+                            console.log("Clear all leads from DB response:", resData);
+                        })
+                        .catch(err => {
+                            console.error("Failed to clear all leads from server:", err);
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
         };
 
