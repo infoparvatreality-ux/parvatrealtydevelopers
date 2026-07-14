@@ -1295,6 +1295,56 @@ export default function App() {
     };
   }, []);
 
+  // Hydrate news, categories and hero banner configs directly from physical server JSON file
+  useEffect(() => {
+    fetch('/api.php?action=get_news_ecosystem')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          if (Array.isArray(data.news)) {
+            setAllNews(data.news);
+            localStorage.setItem('parvat_news', JSON.stringify(data.news));
+          }
+          if (Array.isArray(data.categories)) {
+            const filtered = data.categories.filter((c: string) => c !== 'All');
+            setNewsCategories(['All', ...filtered]);
+            localStorage.setItem('parvat_news_categories', JSON.stringify(['All', ...filtered]));
+          }
+          if (data.hero) {
+            if (data.hero.title) {
+              setNewsHeroTitle(data.hero.title);
+              localStorage.setItem('parvat_news_hero_title', data.hero.title);
+            }
+            if (data.hero.text) {
+              setNewsHeroText(data.hero.text);
+              localStorage.setItem('parvat_news_hero_text', data.hero.text);
+            }
+            if (data.hero.image) {
+              setNewsHeroImage(data.hero.image);
+              localStorage.setItem('parvat_news_hero_image', data.hero.image);
+            } else {
+              setNewsHeroImage(null);
+              localStorage.removeItem('parvat_news_hero_image');
+            }
+          }
+        }
+      })
+      .catch(err => console.error("Failed to hydrate news ecosystem from server JSON:", err));
+  }, []);
+
+  // Hydrate properties directly from physical server JSON file
+  useEffect(() => {
+    fetch('/api.php?action=get_properties')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.properties)) {
+          setActiveProjects(data.properties);
+          localStorage.setItem('parvat_projects', JSON.stringify(data.properties));
+        }
+      })
+      .catch(err => console.error("Failed to hydrate properties from server JSON:", err));
+  }, []);
+
   // Reset selected category if it's no longer present
   useEffect(() => {
     if (!newsCategories.includes(selectedNewsCategory)) {
@@ -3636,7 +3686,7 @@ export default function App() {
                                       </span>
                                     )}
                                     {item.category && (
-                                      <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-neutral-300 bg-neutral-800 border border-neutral-700 rounded">
+                                      <span className="inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 text-[8px] sm:text-[9px] font-mono font-bold tracking-wider text-amber-900 bg-amber-100 border border-amber-200 rounded">
                                         🏷️ {item.category}
                                       </span>
                                     )}

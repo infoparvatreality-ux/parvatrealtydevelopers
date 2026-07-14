@@ -1,0 +1,49 @@
+{
+  "news": [
+    {
+      "id": "n1",
+      "title": "Parvat Reality Announces Upcoming Premium Navi Mumbai Land Launch",
+      "date": "June 28, 2026",
+      "author": "Sales Desk",
+      "snippet": "Expanding our greenfield residential luxury landscape footprint with a fresh 40-acre premium project in the booming Navi Mumbai region.",
+      "category": "Land Launches",
+      "status": "published",
+      "showOnHome": true,
+      "pinned": true,
+      "readingTime": "2 min read",
+      "content": "Our new 40-acre land launch in Navi Mumbai represents a significant milestone. Parvat Reality is designing this modern premium greenfield township with sustainable landscape architecture, smart connectivity corridors, and premium modern amenities to bring the finest luxury living to our customers."
+    },
+    {
+      "id": "n2",
+      "title": "Land Appreciation Rates Soaring in Navi Mumbai Corridors",
+      "date": "June 15, 2026",
+      "author": "Economic Times (Repr.)",
+      "snippet": "With the airport phase completion near, developers report record land inquiries for commercial and logistics plots.",
+      "category": "Market Updates",
+      "status": "published",
+      "showOnHome": true,
+      "pinned": false,
+      "readingTime": "3 min read",
+      "content": "According to industrial analyses, properties around the new Navi Mumbai International Airport are experiencing unprecedented double-digit annual appreciation rates. Parvat's strategic land parcels in these locations are exceptionally well-positioned to leverage this historic growth curve."
+    },
+    {
+      "id": "n3",
+      "title": "How Legal Vetting Is Transforming Land Purchases In West Region",
+      "date": "May 30, 2026",
+      "author": "Parvat Editorial",
+      "snippet": "Clear-title verified certificates and transparent digital boundaries have become the absolute standard for premium investors.",
+      "category": "Corporate News",
+      "status": "published",
+      "showOnHome": true,
+      "pinned": false,
+      "readingTime": "4 min read",
+      "content": "Transparency is at the heart of Parvat Reality. By providing pre-vetted legal papers, title clearance documents, and clear dynamic boundaries, we ensure that every client's investment is 100% secure, creating peace of mind and building lifelong partnerships."
+    }
+  ],
+  "categories": ["All", "Land Launches", "Market Updates", "Corporate News"],
+  "hero": {
+    "title": "PARVAT MEDIA ROOM",
+    "text": "Expanding our greenfield residential luxury landscape footprint across India.",
+    "image": null
+  }
+}

@@ -1472,9 +1472,51 @@
             return JSON.parse(str);
         }
 
+        window.syncNewsEcosystemToServer = function() {
+            const news = JSON.parse(localStorage.getItem('parvat_news') || '[]');
+            const categories = JSON.parse(localStorage.getItem('parvat_news_categories') || '["All", "Land Launches", "Market Updates", "Corporate News"]');
+            const heroTitle = localStorage.getItem('parvat_news_hero_title') || 'PARVAT MEDIA ROOM';
+            const heroText = localStorage.getItem('parvat_news_hero_text') || 'Expanding our greenfield residential luxury landscape footprint across India.';
+            const heroImage = localStorage.getItem('parvat_news_hero_image') || null;
+
+            const sessionStr = sessionStorage.getItem('parvat_admin_session');
+            let token = 'secure_admin_session_token_998877';
+            let email = 'omkarwanve7@gmail.com';
+            if (sessionStr) {
+                try {
+                    const sessionData = JSON.parse(sessionStr);
+                    token = sessionData.token || token;
+                    email = sessionData.email || email;
+                } catch (e) {}
+            }
+
+            fetch('/api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Admin-Email': email
+                },
+                body: JSON.stringify({
+                    action: 'save_news_ecosystem',
+                    news: news,
+                    categories: categories,
+                    hero: {
+                        title: heroTitle,
+                        text: heroText,
+                        image: heroImage
+                    }
+                })
+            })
+            .then(res => res.json())
+            .then(data => console.log("News ecosystem synced to server:", data))
+            .catch(err => console.error("Failed to sync news ecosystem:", err));
+        };
+
         function saveNews(news) {
             localStorage.setItem('parvat_news', JSON.stringify(news));
             renderNewsTable();
+            window.syncNewsEcosystemToServer();
         }
 
         function openNewsModule() {
@@ -2037,6 +2079,7 @@
                     status.classList.add('hidden');
                 }, 3000);
             }
+            window.syncNewsEcosystemToServer();
         }
 
         function handleImageUrlInput() {
@@ -2054,6 +2097,7 @@
                     if (placeholder) {
                         placeholder.classList.add('hidden');
                     }
+                    window.syncNewsEcosystemToServer();
                 }
             }
         }
@@ -2080,6 +2124,7 @@
                 if (urlInput) {
                     urlInput.value = 'Uploaded Image (Local File)';
                 }
+                window.syncNewsEcosystemToServer();
             };
             reader.readAsDataURL(file);
         }
@@ -2104,6 +2149,7 @@
             if (urlInput) {
                 urlInput.value = '';
             }
+            window.syncNewsEcosystemToServer();
         }
 
         // --- HOMEPAGE HERO SLIDER MANAGER LOGIC ---
@@ -2357,6 +2403,7 @@
                     status.classList.add('hidden');
                 }, 3000);
             }
+            window.syncNewsEcosystemToServer();
         }
 
         let editingCategoryName = null;
@@ -3976,6 +4023,44 @@
         window.saveProperties = function(projects) {
             localStorage.setItem('parvat_projects', JSON.stringify(projects));
             window.renderPropertiesTable();
+            window.syncPropertiesToServer();
+        };
+
+        window.syncPropertiesToServer = function() {
+            const projects = JSON.parse(localStorage.getItem('parvat_projects') || '[]');
+
+            const sessionStr = sessionStorage.getItem('parvat_admin_session');
+            let token = 'secure_admin_session_token_998877';
+            let email = 'omkarwanve7@gmail.com';
+            if (sessionStr) {
+                try {
+                    const sessionData = JSON.parse(sessionStr);
+                    token = sessionData.token || token;
+                    email = sessionData.email || email;
+                } catch (e) {}
+            }
+
+            fetch('/api.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    'X-Admin-Email': email
+                },
+                body: JSON.stringify({
+                    action: 'save_properties',
+                    properties: projects
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Properties synced to server:", data);
+                if (data.success && Array.isArray(data.properties)) {
+                    localStorage.setItem('parvat_projects', JSON.stringify(data.properties));
+                    window.renderPropertiesTable();
+                }
+            })
+            .catch(err => console.error("Failed to sync properties:", err));
         };
 
         window.openPropertiesModule = function() {
@@ -4825,8 +4910,56 @@ Source: ${source}`;
             }
         };
 
+        // Hydrate ecosystem news, categories and hero from backend JSON files
+        function hydrateNewsEcosystem() {
+            fetch('/api.php?action=get_news_ecosystem')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        if (Array.isArray(data.news)) {
+                            localStorage.setItem('parvat_news', JSON.stringify(data.news));
+                        }
+                        if (Array.isArray(data.categories)) {
+                            const filtered = data.categories.filter(c => c !== 'All');
+                            localStorage.setItem('parvat_news_categories', JSON.stringify(['All', ...filtered]));
+                        }
+                        if (data.hero) {
+                            if (data.hero.title) localStorage.setItem('parvat_news_hero_title', data.hero.title);
+                            if (data.hero.text) localStorage.setItem('parvat_news_hero_text', data.hero.text);
+                            if (data.hero.image) {
+                                localStorage.setItem('parvat_news_hero_image', data.hero.image);
+                            } else {
+                                localStorage.removeItem('parvat_news_hero_image');
+                            }
+                        }
+                        // Refresh UI elements
+                        if (typeof renderNewsTable === 'function') renderNewsTable();
+                        if (typeof renderCategoriesTags === 'function') renderCategoriesTags();
+                        if (typeof initHeroBannerSettings === 'function') initHeroBannerSettings();
+                    }
+                })
+                .catch(err => console.error("Ecosystem news hydration failed:", err));
+        }
+
+        // Hydrate properties from backend JSON files
+        function hydrateProperties() {
+            fetch('/api.php?action=get_properties')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && Array.isArray(data.properties)) {
+                        localStorage.setItem('parvat_projects', JSON.stringify(data.properties));
+                        if (typeof renderPropertiesTable === 'function') {
+                            renderPropertiesTable();
+                        }
+                    }
+                })
+                .catch(err => console.error("Properties hydration failed:", err));
+        }
+
         // Initialize all controls on start
         function initAllControls() {
+            hydrateNewsEcosystem();
+            hydrateProperties();
             initWhatsAppSettings();
             initHeroBannerSettings();
             initHomepageSliderSettings();
