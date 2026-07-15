@@ -447,10 +447,10 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
 
   // Extract all images
   const images: string[] = [];
-  if (item.image) {
+  if (item?.image) {
     images.push(item.image);
   }
-  if (Array.isArray(item.media)) {
+  if (Array.isArray(item?.media)) {
     item.media.forEach((m: any) => {
       if (m && m.type && typeof m.type === 'string' && (m.type.startsWith('image/') || m.type === 'image') && m.data && !images.includes(m.data)) {
         images.push(m.data);
@@ -463,10 +463,10 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
 
   // Extract all videos
   const videos: string[] = [];
-  if (item.videoLink) {
+  if (item?.videoLink) {
     videos.push(item.videoLink);
   }
-  if (Array.isArray(item.media)) {
+  if (Array.isArray(item?.media)) {
     item.media.forEach((m: any) => {
       if (m && m.type && typeof m.type === 'string' && (m.type.startsWith('video/') || m.type === 'video') && m.data && !videos.includes(m.data)) {
         videos.push(m.data);
@@ -493,7 +493,7 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
           {images.length === 1 ? (
             <img 
               src={images[0]} 
-              alt={item.title} 
+              alt={item?.title || "News Image"} 
               onError={(e) => {
                 e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
               }}
@@ -506,7 +506,7 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
               <div className="w-full h-full relative">
                 <img 
                   src={images[activeIdx]} 
-                  alt={`${item.title} - ${activeIdx + 1}`} 
+                  alt={`${item?.title || "News Image"} - ${activeIdx + 1}`} 
                   onError={(e) => {
                     e.currentTarget.src = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80";
                   }}
@@ -4006,17 +4006,17 @@ export default function App() {
                     </button>
                     <div className="space-y-4">
                       <div className="flex flex-wrap items-center gap-3">
-                        <span className="text-amber-500 text-sm font-mono tracking-widest">{item.date}</span>
-                        {item.category && (
+                        <span className="text-amber-500 text-sm font-mono tracking-widest">{item?.date}</span>
+                        {item?.category && (
                           <>
                             <span className="text-neutral-600 text-xs">•</span>
-                            <span className="text-neutral-400 text-xs font-mono">🏷️ {item.category}</span>
+                            <span className="text-neutral-400 text-xs font-mono">🏷️ {item?.category}</span>
                           </>
                         )}
                         <span className="text-neutral-600 text-xs">•</span>
-                        <span className="text-amber-500/80 text-xs font-mono">⏱️ {item.readingTime || '2 min read'}</span>
+                        <span className="text-amber-500/80 text-xs font-mono">⏱️ {item?.readingTime || '2 min read'}</span>
                       </div>
-                      <h1 className="text-3xl md:text-5xl font-serif font-bold text-white leading-tight">{item.title}</h1>
+                      <h1 className="text-3xl md:text-5xl font-serif font-bold text-white leading-tight">{item?.title}</h1>
                       <div className="flex items-center gap-4 pt-4 border-t border-neutral-800/50 mt-4">
                          <span className="text-neutral-400 text-xs uppercase tracking-widest font-bold">Share:</span>
                          <button 
@@ -4024,8 +4024,8 @@ export default function App() {
                            onClick={() => {
                              if (navigator.share) {
                                navigator.share({
-                                 title: item.title,
-                                 text: item.snippet || "Check out this update from Parvat Reality.",
+                                 title: item?.title || "News Article",
+                                 text: item?.snippet || "Check out this update from Parvat Reality.",
                                  url: window.location.href
                                }).catch(err => console.log("Web Share failed:", err));
                              } else {
@@ -4042,7 +4042,7 @@ export default function App() {
                          <button 
                            className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-green-500 hover:border-green-500 transition-all cursor-pointer" 
                            onClick={() => {
-                             const text = `Hi! Check out this update from Parvat Reality:\n\n*${item.title}*\n\n${item.snippet || ''}\n\nRead more here: ${window.location.href}`;
+                             const text = `Hi! Check out this update from Parvat Reality:\n\n*${item?.title || ''}*\n\n${item?.snippet || ''}\n\nRead more here: ${window.location.href}`;
                              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                            }}
                            title="Share on WhatsApp"
@@ -4074,10 +4074,10 @@ export default function App() {
                     </div>
                     
                     <NewsMediaGallery item={item} />
-
+ 
                     <div className="prose prose-invert prose-amber max-w-none text-neutral-300 font-light leading-relaxed pt-8 pb-12 border-t border-neutral-800/30 mt-8">
                       <p className="text-lg md:text-xl text-white font-medium mb-8 border-l-2 border-amber-500 pl-6 py-2">
-                        {item.snippet}
+                        {item?.snippet}
                       </p>
                       <p>
                         The real estate landscape is continually evolving to meet the demands of modern investors who seek security, luxury, and long-term appreciation. As market dynamics shift, our commitment to delivering uncompromising quality and vetted opportunities remains steadfast.
@@ -4128,23 +4128,23 @@ export default function App() {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {allNews
-                          .filter((n: any) => n.id !== item.id)
+                          .filter((n: any) => n.id !== item?.id)
                           .slice(0, 3)
                           .map((otherItem: any, index: number) => (
                             <div 
-                              key={otherItem.id}
-                              onClick={() => navigateTo('news', otherItem.id)}
+                              key={otherItem?.id}
+                              onClick={() => navigateTo('news', otherItem?.id)}
                               style={{ animationDelay: `${index * 120}ms` }}
                               className="bg-neutral-900 border border-neutral-800/80 hover:border-amber-500/30 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
-                              {Array.isArray(otherItem.media) && otherItem.media.length > 0 ? (
+                              {Array.isArray(otherItem?.media) && otherItem.media.length > 0 ? (
                                 <div className="relative h-40 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none bg-neutral-950">
                                   {otherItem.media.map((m: any, idx: number) => (
                                     <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
                                       {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
                                          <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                       ) : (
-                                         <img src={m ? m.data : ''} alt={otherItem.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                         <img src={m ? m.data : ''} alt={otherItem?.title || "News Image"} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
                                       )}
                                     </div>
                                   ))}
@@ -4156,10 +4156,10 @@ export default function App() {
                                     </div>
                                   )}
                                 </div>
-                              ) : otherItem.image ? (
+                              ) : otherItem?.image ? (
                                 <div className="relative h-40 w-full bg-neutral-950 overflow-hidden">
-                                  <img src={otherItem.image} alt={otherItem.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                  {otherItem.videoLink && (
+                                  <img src={otherItem.image} alt={otherItem?.title || "News Image"} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
+                                  {otherItem?.videoLink && (
                                     <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1">
                                       <Play className="w-3.5 h-3.5 text-amber-500 fill-current" />
                                     </div>
@@ -4173,9 +4173,9 @@ export default function App() {
                               
                               <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
                                 <div className="space-y-2">
-                                  <span className="text-[9px] text-amber-500 font-mono tracking-widest block">{otherItem.date}</span>
-                                  <h4 className="text-sm font-serif font-bold text-white group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">{otherItem.title}</h4>
-                                  <p className="text-neutral-400 text-[11px] font-light line-clamp-2 leading-relaxed">{otherItem.snippet}</p>
+                                  <span className="text-[9px] text-amber-500 font-mono tracking-widest block">{otherItem?.date}</span>
+                                  <h4 className="text-sm font-serif font-bold text-white group-hover:text-amber-400 transition-colors line-clamp-2 leading-snug">{otherItem?.title}</h4>
+                                  <p className="text-neutral-400 text-[11px] font-light line-clamp-2 leading-relaxed">{otherItem?.snippet}</p>
                                 </div>
                                 <div className="flex items-center justify-between pt-3 mt-auto border-t border-neutral-800/40">
                                   <span className="text-[9px] text-neutral-500 font-mono uppercase tracking-widest">Read Article</span>
