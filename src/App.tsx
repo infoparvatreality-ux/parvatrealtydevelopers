@@ -1921,7 +1921,7 @@ export default function App() {
                   className="cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.04] hover:rotate-[-0.5deg] active:scale-[0.98] block"
                   title="Go to Home"
                 >
-                  <img src="/logo.png" alt="Parvat Reality Logo" className="h-14 md:h-16 w-auto object-contain rounded-lg border border-slate-100 shadow-sm" referrerPolicy="no-referrer" />
+                  <img src="/logo.png" alt="Parvat Reality Logo" className="h-18 md:h-22 w-auto object-contain transition-all duration-300" referrerPolicy="no-referrer" />
                 </a>
               </div>
             </div>
