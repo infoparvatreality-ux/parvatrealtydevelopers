@@ -1035,13 +1035,26 @@ export default function App() {
   // Helper to read property types from localStorage
   const getPropertyTypes = () => {
     const defaultTypes = [
-      { id: 'type_1', name: 'Residential Plot', image: 'https://images.unsplash.com/photo-1524813686514-a57563d77965?auto=format&fit=crop&w=600&q=80' },
-      { id: 'type_2', name: 'Commercial Land', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80' },
-      { id: 'type_3', name: 'Agricultural Land', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80' },
-      { id: 'type_4', name: 'Farmhouse Land', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80' }
+      { id: 'type_1', name: 'Residential Plot', image: '' },
+      { id: 'type_2', name: 'Commercial Land', image: '' },
+      { id: 'type_3', name: 'Agricultural Land', image: '' },
+      { id: 'type_4', name: 'Farmhouse Land', image: '' },
+      { id: 'type_5', name: 'Investment Land', image: '' }
     ];
     if (typeof window !== 'undefined') {
       try {
+        const saved = localStorage.getItem('parvat_property_types');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const hasInvestment = parsed.some((t: any) => t.name.toUpperCase() === 'INVESTMENT LAND');
+            if (!hasInvestment) {
+              parsed.push({ id: 'type_5', name: 'Investment Land', image: '' });
+              localStorage.setItem('parvat_property_types', JSON.stringify(parsed));
+            }
+            return parsed;
+          }
+        }
         localStorage.setItem('parvat_property_types', JSON.stringify(defaultTypes));
       } catch (e) {}
     }
@@ -2460,15 +2473,12 @@ export default function App() {
                         <button
                           key={type.id}
                           onClick={() => setActiveTypeTab(type.name)}
-                          className={`snap-center flex items-center gap-1.5 md:gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
+                          className={`snap-center px-4 py-2 md:px-5 md:py-2.5 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
                             isActive
-                              ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105'
-                              : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                              ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105 font-bold'
+                              : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700 font-bold'
                           }`}
                         >
-                          {type.image && (
-                            <img src={type.image} alt="" className="w-4 h-4 md:w-5 md:h-5 object-cover rounded-full shrink-0 border border-neutral-700/50" />
-                          )}
                           {type.name}
                         </button>
                       );
@@ -3132,15 +3142,12 @@ export default function App() {
                           <button
                             key={type.id}
                             onClick={() => setActiveTypeTab(type.name)}
-                            className={`snap-center flex items-center gap-1.5 md:gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
+                            className={`snap-center px-4 py-2 md:px-5 md:py-2.5 rounded text-[10px] md:text-xs font-bold tracking-widest uppercase transition-all duration-300 border cursor-pointer shrink-0 ${
                               isActive
-                                ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105'
-                                : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700'
+                                ? 'bg-amber-500 text-neutral-950 border-amber-500 shadow-lg shadow-amber-500/10 scale-105 font-bold'
+                                : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-white hover:border-neutral-700 font-bold'
                             }`}
                           >
-                            {type.image && (
-                              <img src={type.image} alt="" className="w-4 h-4 md:w-5 md:h-5 object-cover rounded-full shrink-0 border border-neutral-700/50" />
-                            )}
                             {type.name}
                           </button>
                         );

@@ -894,12 +894,8 @@
                 <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">Create New Property Type</h4>
                 <div class="space-y-3">
                     <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Enter Property Type (e.g., Commercial, Residential)</label>
-                        <input type="text" id="new-property-type-input" placeholder="e.g. Commercial" class="w-full bg-white border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-slate-900 rounded-lg px-4 py-2 text-xs outline-none transition-all">
-                    </div>
-                    <div class="space-y-1.5">
-                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Category Image / Icon (File Upload)</label>
-                        <input type="file" id="new-property-type-image" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                        <label class="block text-[10px] font-bold text-slate-700 uppercase tracking-wider">Enter Property Type (e.g., Commercial, Residential, Investment Land)</label>
+                        <input type="text" id="new-property-type-input" placeholder="e.g. Investment Land" class="w-full bg-white border border-slate-200 focus:border-blue-600 focus:ring-1 focus:ring-blue-600 text-slate-900 rounded-lg px-4 py-2 text-xs outline-none transition-all">
                     </div>
                     <button onclick="addPropertyType()" class="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs tracking-wider uppercase rounded-lg shadow-sm hover:shadow transition-all whitespace-nowrap cursor-pointer">
                         ADD TYPE
@@ -3055,24 +3051,35 @@
 
         // --- PROPERTY TYPE CATEGORIES SCRIPT LOGIC ---
         const DEFAULT_PROPERTY_TYPES = [
-            { id: 'type_1', name: 'Residential Plot', image: 'https://images.unsplash.com/photo-1524813686514-a57563d77965?auto=format&fit=crop&w=600&q=80' },
-            { id: 'type_2', name: 'Commercial Land', image: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80' },
-            { id: 'type_3', name: 'Agricultural', image: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80' },
-            { id: 'type_4', name: 'Farmhouse Land', image: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80' }
+            { id: 'type_1', name: 'Residential Plot', image: '' },
+            { id: 'type_2', name: 'Commercial Land', image: '' },
+            { id: 'type_3', name: 'Agricultural Land', image: '' },
+            { id: 'type_4', name: 'Farmhouse Land', image: '' },
+            { id: 'type_5', name: 'Investment Land', image: '' }
         ];
 
         function getPropertyTypes() {
             const saved = localStorage.getItem('parvat_property_types');
+            let types = null;
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
-                        return parsed;
+                        types = parsed;
                     }
                 } catch (e) {}
             }
-            localStorage.setItem('parvat_property_types', JSON.stringify(DEFAULT_PROPERTY_TYPES));
-            return [...DEFAULT_PROPERTY_TYPES];
+            if (!types) {
+                localStorage.setItem('parvat_property_types', JSON.stringify(DEFAULT_PROPERTY_TYPES));
+                types = [...DEFAULT_PROPERTY_TYPES];
+            }
+            // Ensure Investment Land exists
+            const hasInvestment = types.some(t => t.name.toUpperCase() === 'INVESTMENT LAND');
+            if (!hasInvestment) {
+                types.push({ id: 'type_5', name: 'Investment Land', image: '' });
+                localStorage.setItem('parvat_property_types', JSON.stringify(types));
+            }
+            return types;
         }
 
         function savePropertyTypes(types) {
@@ -3102,15 +3109,8 @@
                 cardEl.className = 'bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4';
                 cardEl.innerHTML = `
                     <div class="flex items-center gap-3 w-full">
-                        <img src="${escapeHtml(type.image)}" class="w-12 h-12 object-cover rounded-lg border border-slate-200 shadow-sm shrink-0" id="type-img-preview-${type.id}">
                         <div class="flex-1 min-w-0">
                             <input type="text" value="${escapeHtml(type.name)}" id="type-name-input-${type.id}" class="w-full bg-white border border-slate-200 font-bold text-slate-900 rounded px-2 py-1 text-xs outline-none focus:ring-1 focus:ring-indigo-500">
-                            <div class="flex items-center gap-2 mt-1">
-                                <label class="text-[9px] font-bold text-indigo-600 hover:text-indigo-800 uppercase tracking-wider cursor-pointer select-none">
-                                    Replace Image
-                                    <input type="file" accept="image/*" class="hidden" onchange="window.replacePropertyTypeImage('${type.id}', this)">
-                                </label>
-                            </div>
                         </div>
                     </div>
                     <div class="flex sm:flex-col gap-2 w-full sm:w-auto justify-end shrink-0">
@@ -3124,7 +3124,6 @@
 
         window.addPropertyType = function() {
             const input = document.getElementById('new-property-type-input');
-            const fileInput = document.getElementById('new-property-type-image');
             if (!input) return;
 
             const name = input.value.trim();
@@ -3140,50 +3139,17 @@
             }
 
             const newId = 'type_' + Date.now();
-            const defaultImg = 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=600&q=80';
-
-            const addTypeWithImage = (imgData) => {
-                types.push({
-                    id: newId,
-                    name: name,
-                    image: imgData || defaultImg
-                });
-                savePropertyTypes(types);
-                input.value = '';
-                fileInput.value = '';
-            };
-
-            const file = fileInput.files ? fileInput.files[0] : null;
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    addTypeWithImage(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            } else {
-                addTypeWithImage(null);
-            }
+            types.push({
+                id: newId,
+                name: name,
+                image: ''
+            });
+            savePropertyTypes(types);
+            input.value = '';
         };
 
         window.replacePropertyTypeImage = function(id, fileInput) {
-            const file = fileInput.files ? fileInput.files[0] : null;
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const base64Data = e.target.result;
-                const imgPreview = document.getElementById(`type-img-preview-${id}`);
-                if (imgPreview) {
-                    imgPreview.src = base64Data;
-                }
-                const types = getPropertyTypes();
-                const index = types.findIndex(t => t.id === id);
-                if (index !== -1) {
-                    types[index].image = base64Data;
-                    savePropertyTypes(types);
-                }
-            };
-            reader.readAsDataURL(file);
+            // Deprecated/no-op as images are removed from the property type buttons
         };
 
         window.savePropertyTypeUpdate = function(id) {
