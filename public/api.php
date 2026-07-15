@@ -1,4 +1,10 @@
 <?php
+// Increase upload limits to 500MB
+@ini_set('upload_max_filesize', '500M');
+@ini_set('post_max_size', '500M');
+@ini_set('memory_limit', '512M');
+@set_time_limit(300); // 5 minutes execution time limit
+
 // Set headers for CORS and JSON content type
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Admin-Email");

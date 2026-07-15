@@ -1107,7 +1107,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                 </svg>
                                 <p class="text-[11px] font-bold text-slate-600">Drag files here or click</p>
-                                <p class="text-[9px] text-slate-400">JPG, PNG, MP4 (Max 5MB)</p>
+                                <p class="text-[9px] text-slate-400">JPG, PNG, MP4 (Max 500MB)</p>
                                 <input type="file" id="project-media-input" multiple accept="image/*,video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             </div>
                         </div>
@@ -1411,7 +1411,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
                                 </svg>
                                 <p class="text-[11px] font-bold text-slate-600">Drag files here or click</p>
-                                <p class="text-[9px] text-slate-400">JPG, PNG, MP4 (Max 5MB)</p>
+                                <p class="text-[9px] text-slate-400">JPG, PNG, MP4 (Max 500MB)</p>
                                 <input type="file" id="news-media-input" multiple accept="image/*,video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
                             </div>
                         </div>
@@ -1791,8 +1791,8 @@
 
             const handleFiles = (files) => {
                 Array.from(files).forEach(file => {
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert(`File ${file.name} is too large. Max 5MB.`);
+                    if (file.size > 500 * 1024 * 1024) {
+                        alert(`File ${file.name} is too large. Max 500MB.`);
                         return;
                     }
                     const reader = new FileReader();
@@ -1899,8 +1899,8 @@
 
             const handleFiles = (files) => {
                 Array.from(files).forEach(file => {
-                    if (file.size > 5 * 1024 * 1024) {
-                        alert(`File ${file.name} is too large. Max 5MB.`);
+                    if (file.size > 500 * 1024 * 1024) {
+                        alert(`File ${file.name} is too large. Max 500MB.`);
                         return;
                     }
                     const reader = new FileReader();
