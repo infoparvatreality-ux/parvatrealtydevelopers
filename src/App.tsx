@@ -31,7 +31,8 @@ import {
   Play,
   Zap,
   Droplet,
-  Shield
+  Shield,
+  FileText
 } from 'lucide-react';
 
 const scrubBase64FromNews = (newsArray: any[]): any[] => {
@@ -1050,6 +1051,10 @@ export default function App() {
   // Brochure download feedback state
   const [downloadingBrochure, setDownloadingBrochure] = useState<string | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+  const brochureScrollRef = useRef<HTMLDivElement>(null);
+  const [brochures, setBrochures] = useState<any[]>(() => {
+    return getBrochures();
+  });
 
   // Synchronize active property tab category with our actual focus areas
   useEffect(() => {
@@ -1309,6 +1314,16 @@ export default function App() {
         }
       } catch (e) {}
 
+      // Sync Brochures
+      try {
+        const savedBrochures = localStorage.getItem('parvat_brochures');
+        if (savedBrochures) {
+          setBrochures(JSON.parse(savedBrochures));
+        } else {
+          setBrochures(getBrochures());
+        }
+      } catch (e) {}
+
       // Trigger a re-render
       setStorageUpdateKey(prev => prev + 1);
     };
@@ -1321,7 +1336,8 @@ export default function App() {
         e.key === 'parvat_news_hero_text' ||
         e.key === 'parvat_news_hero_image' ||
         e.key === 'parvat_whatsapp_channel_url' ||
-        e.key === 'parvat_projects'
+        e.key === 'parvat_projects' ||
+        e.key === 'parvat_brochures'
       ) {
         syncFromStorage();
       }
@@ -1387,6 +1403,19 @@ export default function App() {
         }
       })
       .catch(err => console.error("Failed to hydrate properties from server JSON:", err));
+  }, []);
+
+  // Hydrate brochures directly from physical server JSON file
+  useEffect(() => {
+    fetch('/api.php?action=get_brochures')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && Array.isArray(data.brochures)) {
+          setBrochures(data.brochures);
+          localStorage.setItem('parvat_brochures', JSON.stringify(data.brochures));
+        }
+      })
+      .catch(err => console.error("Failed to hydrate brochures from server JSON:", err));
   }, []);
 
   // Reset selected category if it's no longer present
@@ -1900,26 +1929,42 @@ export default function App() {
     }, 1500);
   };
 
+  const scrollBrochure = (direction: 'left' | 'right') => {
+    if (brochureScrollRef.current) {
+      const { scrollLeft, clientWidth } = brochureScrollRef.current;
+      const scrollAmount = clientWidth * 0.75;
+      const targetScroll = direction === 'left' ? scrollLeft - scrollAmount : scrollLeft + scrollAmount;
+      brochureScrollRef.current.scrollTo({
+        left: targetScroll,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-neutral-950 font-sans antialiased text-neutral-200">
       
       {/* FIXED NAVBAR */}
       <nav id="main-navbar" className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20 md:h-24">
+          <div className="flex items-center justify-between h-24 md:h-28 lg:h-32">
             
             {/* Left Side: Brand Logo Header */}
-            <div className="flex items-center space-x-2">
-              <div className="flex items-center">
-                {/* Main Logo: Click to navigate home with professional hover effects */}
-                <a 
-                  href="/index.html"
-                  className="cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.04] hover:rotate-[-0.5deg] active:scale-[0.98] block"
-                  title="Go to Home"
-                >
-                  <img src="/logo.png" alt="Parvat Reality Logo" className="h-18 md:h-22 w-auto object-contain transition-all duration-300" referrerPolicy="no-referrer" />
-                </a>
-              </div>
+            <div className="flex items-center">
+              {/* Main Logo: Click to navigate home with professional hover effects, no background/border constraints */}
+              <a 
+                href="/index.html"
+                className="cursor-pointer transition-all duration-300 ease-out transform hover:scale-[1.05] active:scale-[0.98] block"
+                title="Go to Home"
+              >
+                <img 
+                  src="/logo.png" 
+                  alt="Parvat Reality Logo" 
+                  className="h-20 sm:h-24 md:h-26 lg:h-28 w-auto object-contain transition-all duration-300 mix-blend-multiply" 
+                  style={{ mixBlendMode: 'multiply' }}
+                  referrerPolicy="no-referrer" 
+                />
+              </a>
             </div>
 
             {/* Center: Visible links for desktop */}
@@ -2215,7 +2260,7 @@ export default function App() {
 
             {/* Action 3: WhatsApp Us */}
             <a 
-              href="https://wa.me/918591668166"
+              href="https://api.whatsapp.com/send?phone=918591818166"
               target="_blank"
               rel="noopener noreferrer"
               className="whatsapp-btn flex items-center justify-center gap-1.5 sm:gap-3 h-14 sm:h-16 md:h-20 bg-[#00c853] hover:bg-[#00963e] text-white rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 cursor-pointer font-sans font-extrabold text-[10px] sm:text-xs md:text-sm lg:text-base tracking-wider uppercase px-1 sm:px-4"
@@ -2582,67 +2627,261 @@ export default function App() {
       >
         <div className="max-w-7xl mx-auto space-y-24">
           
-          {/* Sub-section: Brochures Download */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
-            <div className="space-y-5 lg:col-span-1">
-              <span className="text-red-600 text-xs font-bold tracking-[0.25em] uppercase flex items-center gap-2">
-                <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-600 animate-ping"></span>
-                Official Materials
-              </span>
-              <h3 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 tracking-wide leading-tight">
-                Download Layout Plans &amp; Brochures
-              </h3>
-              <p className="text-slate-600 text-sm font-light leading-relaxed">
-                Gain access to detailed spatial drawings, verified registry reports, legal documents, and premium catalogs instantly.
-              </p>
-              
+          {/* Sub-section: Brochures Download Redesigned as Premium Carousel Slider */}
+          <div className="space-y-12">
+            {/* Heading Section */}
+            <div className="text-center">
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-sans font-extrabold text-slate-900 tracking-tight">
+                View Brochures
+              </h2>
               {downloadSuccess && (
-                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl animate-fadeIn">
-                  Successfully requested download for <strong className="text-slate-950">{downloadSuccess}</strong>. The document has been prepared.
+                <div className="max-w-md mx-auto mt-4 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs rounded-xl animate-fadeIn">
+                  Successfully requested brochure for <strong className="text-slate-950">{downloadSuccess}</strong>. Sharing PDF details via WhatsApp...
                 </div>
               )}
             </div>
 
-            <div className="lg:col-span-2 space-y-4">
-              {getBrochures().map((brochure: any) => {
-                const messageText = `Hi Parvat Reality, I am interested in ${brochure.title}. Please share the layout plan.`;
-                const whatsappUrl = `https://wa.me/918591668166?text=${encodeURIComponent(messageText)}`;
-                return (
-                  <div 
-                    key={brochure.id}
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-blue-200/50 transition-all duration-300"
-                  >
-                    <div className="flex items-center space-x-4">
-                      {/* Rich Crimson Gradient PDF Badge */}
-                      <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 bg-gradient-to-br from-red-600 via-rose-600 to-red-800 text-white font-extrabold text-xs tracking-wider rounded-xl shadow-lg shadow-red-500/20 border border-red-500/10">
-                        PDF
-                      </div>
-                      <div>
-                        <h4 className="text-sm md:text-base font-bold text-slate-800">{brochure.title}</h4>
-                        {brochure.subtitle && (
-                          <p className="text-xs text-slate-500 font-light mt-0.5">{brochure.subtitle}</p>
+            {/* Slider / Carousel Viewport */}
+            <div className="relative px-2 sm:px-12 group/slider">
+              
+              {/* Left Navigation Arrow */}
+              <button 
+                onClick={() => scrollBrochure('left')}
+                className="absolute left-0 sm:left-4 top-[40%] -translate-y-1/2 w-12 h-12 rounded-full bg-white text-slate-800 shadow-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all duration-200 z-20 cursor-pointer focus:outline-none"
+                aria-label="Previous Brochure"
+              >
+                <ChevronLeft className="w-6 h-6 text-slate-800" />
+              </button>
+
+              {/* Right Navigation Arrow */}
+              <button 
+                onClick={() => scrollBrochure('right')}
+                className="absolute right-0 sm:right-4 top-[40%] -translate-y-1/2 w-12 h-12 rounded-full bg-white text-slate-800 shadow-xl border border-slate-100 flex items-center justify-center hover:bg-slate-50 hover:scale-105 active:scale-95 transition-all duration-200 z-20 cursor-pointer focus:outline-none"
+                aria-label="Next Brochure"
+              >
+                <ChevronRight className="w-6 h-6 text-slate-800" />
+              </button>
+
+              {/* Horizontal Scroll Track */}
+              <div 
+                ref={brochureScrollRef}
+                className="flex gap-6 overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar pb-8 pt-4 px-2"
+                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              >
+                {brochures.map((brochure: any, idx: number) => {
+                  const messageText = `Hi Parvat Reality, I am interested in ${brochure.title}. Please share the layout plan.`;
+                  const whatsappUrl = `https://api.whatsapp.com/send?phone=918591818166&text=${encodeURIComponent(messageText)}`;
+                  
+                  return (
+                    <div 
+                      key={brochure.id || idx}
+                      className="w-[85vw] sm:w-[46%] lg:w-[31.5%] flex-shrink-0 snap-center flex flex-col group"
+                    >
+                      {/* Linked Card wrapper with exact aspect ratio 4:3 */}
+                      <a 
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() => handleDownloadBrochure(brochure.title)}
+                        className="block relative rounded-2xl overflow-hidden aspect-[4/3] bg-neutral-950 border border-slate-200 shadow-md hover:shadow-2xl hover:border-slate-300 transition-all duration-300 transform group-hover:-translate-y-1.5 cursor-pointer"
+                      >
+                        {/* Red PDF banner/badge exactly matching the cover position in image_15.png */}
+                        <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-2.5 py-1 bg-[#dc2626] text-white font-sans font-black text-[10px] tracking-wider rounded-md shadow-md border border-red-500/10">
+                          <FileText className="w-3.5 h-3.5 text-white" />
+                          <span>PDF</span>
+                        </div>
+
+                        {/* Custom Cover Layout - Reconstructing the precise luxury visual patterns in image_15.png */}
+                        {brochure.coverImage ? (
+                          /* DYNAMIC UPLOADED COVER IMAGE DISPLAY */
+                          <div className="w-full h-full relative">
+                            <img 
+                              src={brochure.coverImage} 
+                              alt={brochure.title} 
+                              className="w-full h-full object-cover"
+                              referrerPolicy="no-referrer"
+                            />
+                            {/* Premium overlay to enhance text readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent p-4 flex flex-col justify-end text-left">
+                              <h4 className="text-white text-sm sm:text-base font-sans font-black tracking-tight leading-tight line-clamp-2">
+                                {brochure.title}
+                              </h4>
+                              {brochure.subtitle && (
+                                <p className="text-white/80 text-[8px] md:text-[9px] mt-1 font-light leading-snug line-clamp-1">
+                                  {brochure.subtitle}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ) : idx % 3 === 0 ? (
+                          /* COVER STYLE 1: Mumbai 3.0 / Discover a Lifetime Growth */
+                          <div className="w-full h-full flex">
+                            {/* Left: Beautiful Coastal Bridge Image */}
+                            <div className="w-3/5 h-full relative">
+                              <img 
+                                src="https://images.unsplash.com/photo-1545137685-11516e87b7a1?auto=format&fit=crop&w=600&q=80" 
+                                alt="Atal Setu Coastal Infrastructure Bridge" 
+                                className="w-full h-full object-cover"
+                                referrerPolicy="no-referrer"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-blue-900/10 to-transparent p-4 flex flex-col justify-end text-left">
+                                <span className="text-[9px] font-sans italic font-medium text-blue-100 tracking-wide">
+                                  Discover a
+                                </span>
+                                <h4 className="text-white text-base sm:text-lg font-sans font-black tracking-tight leading-none mt-0.5">
+                                  Lifetime Growth
+                                </h4>
+                                <p className="text-white/85 text-[8px] md:text-[9px] mt-1 font-light leading-snug">
+                                  Amid Thriving Infrastructure and Connectivity
+                                </p>
+                              </div>
+                            </div>
+                            {/* Right: Solid blue information panel */}
+                            <div className="w-2/5 h-full bg-[#0b5499] flex flex-col justify-between p-4 text-white text-left">
+                              <div className="space-y-1">
+                                <div className="text-[7px] md:text-[8px] font-bold tracking-wider text-blue-100 uppercase leading-snug">
+                                  OFFERING
+                                </div>
+                                <div className="text-[7px] md:text-[8px] font-bold tracking-wider text-blue-100 uppercase leading-snug">
+                                  INVESTMENT
+                                </div>
+                                <div className="text-[7px] md:text-[8px] font-bold tracking-wider text-blue-100 uppercase leading-snug">
+                                  OPPORTUNITIES
+                                </div>
+                                <div className="text-[9px] md:text-[10px] font-black tracking-wide uppercase font-sans border-b border-white/20 pb-1.5">
+                                  IN MUMBAI 3.0:
+                                </div>
+                              </div>
+                              <div className="space-y-1">
+                                <div className="text-[9px] md:text-[10px] font-black text-amber-300 tracking-wider uppercase">
+                                  VISA TO
+                                </div>
+                                <div className="text-xs md:text-sm font-black text-white font-sans leading-tight">
+                                  MUMBAI 3.0
+                                </div>
+                                <div className="w-6 h-0.5 bg-amber-400 mt-1"></div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : idx % 3 === 1 ? (
+                          /* COVER STYLE 2: Mumbai 3.0 Connectivity Map Graphic */
+                          <div className="w-full h-full relative bg-[#e3f2fd] flex flex-col justify-between">
+                            {/* Map Pattern Background */}
+                            <div className="absolute inset-0">
+                              <img 
+                                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=600&q=80" 
+                                alt="Regional Topographical Map" 
+                                className="w-full h-full object-cover opacity-80 mix-blend-multiply"
+                                referrerPolicy="no-referrer"
+                              />
+                            </div>
+
+                            {/* Cartographic styled content overlay */}
+                            <div className="relative z-10 p-4 flex-1 flex flex-col justify-between">
+                              <div className="space-y-1 text-left">
+                                <span className="text-[8px] tracking-widest font-black bg-[#1e40af] text-white px-2 py-0.5 rounded shadow-sm">
+                                  MAP PREVIEW
+                                </span>
+                                <h4 className="text-slate-900 text-sm md:text-base font-sans font-black tracking-tight leading-tight pt-1.5">
+                                  CONNECTIVITY CORRIDORS
+                                </h4>
+                              </div>
+
+                              {/* Styled geographical tag labels */}
+                              <div className="relative w-full h-24 mt-2">
+                                <div className="absolute top-1 left-4 bg-white/95 text-slate-800 text-[8px] font-bold px-2 py-0.5 rounded shadow border border-slate-200">
+                                  📍 Mumbai
+                                </div>
+                                <div className="absolute top-8 right-6 bg-amber-500 text-white text-[8px] font-bold px-2 py-0.5 rounded shadow border border-amber-600">
+                                  ⚡ Navi Mumbai
+                                </div>
+                                <div className="absolute bottom-2 left-12 bg-blue-600 text-white text-[8px] font-bold px-2 py-0.5 rounded shadow border border-blue-750">
+                                  ⭐ Panvel Corridor
+                                </div>
+                              </div>
+
+                              <div className="text-left border-t border-slate-300/60 pt-2 flex items-center justify-between">
+                                <span className="text-[8px] font-mono font-bold text-slate-600 uppercase tracking-widest">REGIONAL BLUEPRINT</span>
+                                <span className="text-[8px] font-mono text-slate-500 font-bold">{brochure.fileSize}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          /* COVER STYLE 3: Maharashtra Government's Major Infrastructure Plan */
+                          <div className="w-full h-full flex bg-[#dedede] relative">
+                            {/* Left Panel: Airplane / Cargo Collage */}
+                            <div className="w-[55%] h-full relative flex flex-col justify-between p-4 z-10 text-left">
+                              <div className="space-y-1">
+                                <span className="text-[8px] text-slate-500 font-black uppercase tracking-wider block">OFFICIAL STUDY</span>
+                                <h4 className="text-slate-900 text-[10px] md:text-xs font-sans font-extrabold tracking-tight leading-tight">
+                                  INFRASTRUCTURE OUTLOOK
+                                </h4>
+                              </div>
+                              
+                              <div className="relative w-full h-20 overflow-hidden rounded-lg shadow-sm border border-slate-300/40">
+                                <img 
+                                  src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=400&q=80" 
+                                  alt="Infrastructure logistics plane cargo" 
+                                  className="w-full h-full object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                                <span className="absolute bottom-1 left-2 text-[7px] text-white font-mono font-bold tracking-wide">Chhatrapati Shivaji International</span>
+                              </div>
+
+                              <p className="text-[7px] text-slate-500 font-light leading-snug line-clamp-2">
+                                {brochure.subtitle}
+                              </p>
+                            </div>
+
+                            {/* Right Panel: Navy blue government summary */}
+                            <div className="w-[45%] h-full bg-[#104b80] flex flex-col justify-between p-4 text-white text-left">
+                              <div className="space-y-1">
+                                <div className="text-[7px] md:text-[8px] font-bold tracking-widest text-slate-300 uppercase leading-snug">
+                                  MAHARASHTRA
+                                </div>
+                                <div className="text-[7px] md:text-[8px] font-bold tracking-widest text-slate-300 uppercase leading-snug">
+                                  GOVERNMENT'S
+                                </div>
+                                <div className="text-[8px] md:text-[9px] font-bold tracking-wide uppercase text-blue-200 font-sans border-b border-white/20 pb-1.5 mt-0.5">
+                                  MAJOR INFRASTRUCTURE
+                                </div>
+                              </div>
+                              <div className="space-y-1.5">
+                                <div className="text-xs md:text-sm font-black text-amber-300 font-sans tracking-wide leading-tight">
+                                  MUMBAI 3.0
+                                </div>
+                                <div className="space-y-0.5 text-[6px] md:text-[7px] text-slate-200 font-light leading-tight">
+                                  <div>• Trans Harbour Link</div>
+                                  <div>• Navi Mumbai Airport</div>
+                                  <div>• Multi-Modal Corridor</div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         )}
-                        <p className="text-xs text-slate-400 font-mono mt-1 text-[11px]">Size: {brochure.fileSize} &bull; {brochure.downloads} downloads</p>
+                      </a>
+
+                      {/* Linked "VIEW BROCHURE" text placed exactly below each card as requested */}
+                      <div className="mt-4 flex items-center justify-between px-2 text-left">
+                        <a 
+                          href={whatsappUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => handleDownloadBrochure(brochure.title)}
+                          className="text-[11px] font-black tracking-[0.2em] text-[#555555] hover:text-red-600 transition-colors duration-200 uppercase cursor-pointer"
+                        >
+                          VIEW BROCHURE
+                        </a>
+                        <span className="text-[10px] font-sans font-semibold text-slate-400 uppercase tracking-wider">
+                          {brochure.fileSize || 'PDF'}
+                        </span>
                       </div>
                     </div>
+                  );
+                })}
+              </div>
 
-                    <motion.a
-                      href={whatsappUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      whileHover={{ 
-                        scale: 1.05, 
-                        boxShadow: "0 10px 20px -5px rgba(37, 99, 235, 0.4), 0 0 12px rgba(37, 99, 235, 0.3)" 
-                      }}
-                      whileTap={{ scale: 0.93 }}
-                      transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                      className="w-full sm:w-auto mt-4 sm:mt-0 px-6 py-3 rounded-xl text-xs font-bold tracking-widest uppercase transition-colors duration-200 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white border border-blue-500/30 shadow-lg text-center flex items-center justify-center"
-                    >
-                      DOWNLOAD FILE
-                    </motion.a>
-                  </div>
-                );
-              })}
             </div>
           </div>
 
@@ -2670,7 +2909,7 @@ export default function App() {
                     className="bg-neutral-950/40 border border-neutral-800/60 hover:border-amber-500/40 rounded-xl transition-all duration-300 hover:-translate-y-1.5 flex flex-col justify-between h-full overflow-hidden cursor-pointer group shadow-lg text-left animate-fade-in-up"
                   >
                     <div className="flex-1 flex flex-col">
-                      {((Array.isArray(item.media) && item.media.length > 0) || item.image) && (
+                      {((Array.isArray(item.media) && item.media.length > 0) || (item.image && !item.image.includes('1560518883'))) && (
                         Array.isArray(item.media) && item.media.length > 0 ? (
                           <div className="relative h-28 xs:h-36 sm:h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
                             {item.media.map((m: any, idx: number) => (
@@ -2679,7 +2918,7 @@ export default function App() {
                                    <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                 ) : (
                                    <img 
-                                     src={m && m.data ? m.data : item.image} 
+                                     src={m && m.data ? m.data : (item.image && !item.image.includes('1560518883') ? item.image : '')} 
                                      alt={item.title} 
                                      onError={(e) => {
                                        e.currentTarget.style.display = 'none';
@@ -2700,7 +2939,7 @@ export default function App() {
                         ) : (
                           <div className="relative h-28 xs:h-36 sm:h-48 w-full overflow-hidden">
                             <img 
-                              src={item.image} 
+                              src={item.image && !item.image.includes('1560518883') ? item.image : ''} 
                               alt={item.title} 
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
@@ -3628,10 +3867,10 @@ export default function App() {
                           >
                             {/* Background image or themed gradient */}
                             <div className="absolute inset-0 bg-neutral-950">
-                              {((item.media && item.media.length > 0) || item.image) && (
+                              {((item.media && item.media.length > 0) || (item.image && !item.image.includes('1560518883'))) && (
                                 item.media && item.media.length > 0 ? (
                                   <img 
-                                    src={item.media[0].data || item.image} 
+                                    src={item.media[0].data || (item.image && !item.image.includes('1560518883') ? item.image : '')} 
                                     alt={item.title} 
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
@@ -3640,7 +3879,7 @@ export default function App() {
                                   />
                                 ) : (
                                   <img 
-                                    src={item.image} 
+                                    src={item.image && !item.image.includes('1560518883') ? item.image : ''} 
                                     alt={item.title} 
                                     onError={(e) => {
                                       e.currentTarget.style.display = 'none';
@@ -3792,7 +4031,7 @@ export default function App() {
                               className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col justify-between h-full overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
                               <div className="flex-1 flex flex-col">
-                                {((Array.isArray(item.media) && item.media.length > 0) || item.image) && (
+                                {((Array.isArray(item.media) && item.media.length > 0) || (item.image && !item.image.includes('1560518883'))) && (
                                   Array.isArray(item.media) && item.media.length > 0 ? (
                                     <div className="relative h-48 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none">
                                       {item.media.map((m: any, idx: number) => (
@@ -3801,7 +4040,7 @@ export default function App() {
                                              <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
                                           ) : (
                                              <img 
-                                               src={m && m.data ? m.data : item.image} 
+                                               src={m && m.data ? m.data : (item.image && !item.image.includes('1560518883') ? item.image : '')} 
                                                alt={item.title} 
                                                onError={(e) => {
                                                  e.currentTarget.style.display = 'none';
@@ -3822,7 +4061,7 @@ export default function App() {
                                   ) : (
                                     <div className="relative h-48 w-full overflow-hidden">
                                       <img 
-                                        src={item.image} 
+                                        src={item.image && !item.image.includes('1560518883') ? item.image : ''} 
                                         alt={item.title} 
                                         onError={(e) => {
                                           e.currentTarget.style.display = 'none';
@@ -4773,7 +5012,7 @@ export default function App() {
 
       {/* PERSISTENT FLOATING WHATSAPP CHAT WIDGET */}
       <a 
-        href="https://wa.me/918591668166"
+        href="https://api.whatsapp.com/send?phone=918591818166"
         target="_blank"
         rel="noreferrer"
         className="fixed bottom-6 right-6 z-50 flex items-center justify-center w-14 h-14 bg-emerald-500 hover:bg-emerald-400 text-white rounded-full shadow-[0_4px_20px_rgba(16,185,129,0.4)] transition-all duration-300 hover:scale-110 group cursor-pointer"
@@ -5115,7 +5354,7 @@ export default function App() {
 
               <div className="space-y-3">
                 <a 
-                  href="https://wa.me/918591668166?text=Hello%20Parvat%20Reality%2C%20I%20am%20interested%20in%20premium%20land%20details."
+                  href="https://api.whatsapp.com/send?phone=918591818166&text=Hello%20Parvat%20Reality%2C%20I%20am%20interested%20in%20premium%20land%20details."
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setIsWhatsAppOpen(false)}
@@ -5129,7 +5368,7 @@ export default function App() {
                 </a>
 
                 <a 
-                  href="https://wa.me/918591668166?text=Hello%20Parvat%20Reality%2C%20please%20send%20me%20the%20legal%20documents%20and%207/12%20abstract."
+                  href="https://api.whatsapp.com/send?phone=918591818166&text=Hello%20Parvat%20Reality%2C%20please%20send%20me%20the%20legal%20documents%20and%207/12%20abstract."
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setIsWhatsAppOpen(false)}
@@ -5145,7 +5384,7 @@ export default function App() {
 
               <div className="flex justify-center">
                 <a 
-                  href="https://wa.me/918591668166?text=Hello%20Parvat%20Reality%2C%20I%20would%20like%20to%20chat."
+                  href="https://api.whatsapp.com/send?phone=918591818166&text=Hello%20Parvat%20Reality%2C%20I%20would%20like%20to%20chat."
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setIsWhatsAppOpen(false)}

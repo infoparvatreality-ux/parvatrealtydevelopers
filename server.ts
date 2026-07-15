@@ -9,6 +9,7 @@ const NEWS_JSON_PATH = path.join(process.cwd(), "src", "data", "news.json");
 const LEADS_JSON_PATH = path.join(process.cwd(), "src", "data", "leads.json");
 const PROPERTIES_JSON_PATH = path.join(process.cwd(), "src", "data", "properties.json");
 const PAGE_VIEWS_JSON_PATH = path.join(process.cwd(), "src", "data", "page_views.json");
+const BROCHURES_JSON_PATH = path.join(process.cwd(), "src", "data", "brochures.json");
 
 // Helper: Ensure directories exist
 function ensureDataDirExists() {
@@ -16,6 +17,25 @@ function ensureDataDirExists() {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
+}
+
+// Helper: Get Brochures from physical JSON
+function getBrochuresFromFile() {
+  ensureDataDirExists();
+  if (fs.existsSync(BROCHURES_JSON_PATH)) {
+    try {
+      const content = fs.readFileSync(BROCHURES_JSON_PATH, "utf8");
+      return JSON.parse(content);
+    } catch (e: any) {
+      console.error("Error reading brochures.json:", e.message);
+    }
+  }
+  // Initial / default sample brochures fallback
+  return [
+    { id: 'b1', title: 'Parvat Grandeur Phase-I Brochure', fileSize: '4.8 MB', downloads: '1.2k+' },
+    { id: 'b2', title: 'Nature Meadows Layout Blueprint Plan', fileSize: '6.2 MB', downloads: '850+' },
+    { id: 'b3', title: 'Sunrise Valley Legal Title Certificates', fileSize: '11.5 MB', downloads: '2.4k+' }
+  ];
 }
 
 // Helper: Get Properties from physical JSON
@@ -115,6 +135,30 @@ function savePropertiesToFile(properties: any) {
     return true;
   } catch (e: any) {
     console.error("Error writing properties.json:", e.message);
+    return false;
+  }
+}
+
+// Helper: Process base64 strings in brochures and save as physical files
+function processBrochureMediaAndUrls(brochure: any) {
+  if (brochure.coverImage && brochure.coverImage.startsWith("data:")) {
+    const relativePath = saveBase64File(brochure.coverImage, "brochure_cover");
+    if (relativePath) {
+      brochure.coverImage = relativePath;
+    }
+  }
+  return brochure;
+}
+
+// Helper: Save Brochures to physical JSON
+function saveBrochuresToFile(brochures: any) {
+  ensureDataDirExists();
+  try {
+    const processedBrochures = brochures.map((b: any) => processBrochureMediaAndUrls(b));
+    fs.writeFileSync(BROCHURES_JSON_PATH, JSON.stringify(processedBrochures, null, 2), "utf8");
+    return true;
+  } catch (e: any) {
+    console.error("Error writing brochures.json:", e.message);
     return false;
   }
 }
@@ -632,6 +676,28 @@ async function startServer() {
         }
       }
 
+      // Action to save the entire brochures database
+      if (action === "save_brochures") {
+        const authHeader = req.headers.authorization;
+        const adminEmail = req.headers["x-admin-email"];
+        const isAuthorized = 
+          ((adminEmail === "info.parvatreality@gmail.com" || adminEmail === "omkarwanve7@gmail.com") && authHeader === "Bearer secure_admin_session_token_998877") ||
+          (authHeader && authHeader.startsWith("Bearer ") && authHeader.length > 20);
+
+        if (!isAuthorized) {
+          return res.status(401).json({ success: false, error: "Access Denied: Unauthorized administrator session." });
+        }
+
+        const success = saveBrochuresToFile(req.body.brochures || []);
+
+        if (success) {
+          const savedBrochures = getBrochuresFromFile();
+          return res.json({ success: true, message: "Brochures saved dynamically into brochures.json.", brochures: savedBrochures });
+        } else {
+          return res.status(500).json({ success: false, error: "Failed to save brochures." });
+        }
+      }
+
       // Handle lead deletion for local dev
       if (action === "delete_lead") {
         const authHeader = req.headers.authorization;
@@ -720,6 +786,12 @@ async function startServer() {
       if (req.query.action === "get_properties") {
         const properties = getPropertiesFromFile();
         return res.json({ success: true, properties });
+      }
+
+      // Action to retrieve brochures data
+      if (req.query.action === "get_brochures") {
+        const brochures = getBrochuresFromFile();
+        return res.json({ success: true, brochures });
       }
 
       // Handle analytics request
