@@ -142,10 +142,56 @@ function getNewsEcosystemFromFile() {
   };
 }
 
+// Helper: Process base64 strings in news items and save as physical files
+function processNewsMediaAndUrls(newsItem: any) {
+  // Handle main image
+  if (newsItem.image && newsItem.image.startsWith("data:")) {
+    const relativePath = saveBase64File(newsItem.image, "news_main");
+    if (relativePath) {
+      newsItem.image = relativePath;
+    }
+  }
+
+  // Handle main video if base64
+  if (newsItem.videoLink && newsItem.videoLink.startsWith("data:")) {
+    const relativePath = saveBase64File(newsItem.videoLink, "news_video");
+    if (relativePath) {
+      newsItem.videoLink = relativePath;
+    }
+  }
+
+  // Handle media gallery items
+  if (Array.isArray(newsItem.media)) {
+    newsItem.media = newsItem.media.map((med: any, idx: number) => {
+      if (med.data && med.data.startsWith("data:")) {
+        const relativePath = saveBase64File(med.data, `news_gallery_${idx}`);
+        if (relativePath) {
+          return {
+            ...med,
+            data: relativePath
+          };
+        }
+      }
+      return med;
+    });
+  }
+
+  return newsItem;
+}
+
 // Helper: Save News ecosystem to physical JSON
 function saveNewsEcosystemToFile(data: any) {
   ensureDataDirExists();
   try {
+    if (data.news && Array.isArray(data.news)) {
+      data.news = data.news.map((item: any) => processNewsMediaAndUrls(item));
+    }
+    if (data.hero && data.hero.image && data.hero.image.startsWith("data:")) {
+      const relativePath = saveBase64File(data.hero.image, "news_hero");
+      if (relativePath) {
+        data.hero.image = relativePath;
+      }
+    }
     fs.writeFileSync(NEWS_JSON_PATH, JSON.stringify(data, null, 2), "utf8");
     return true;
   } catch (e: any) {
