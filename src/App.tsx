@@ -346,6 +346,24 @@ const getProjects = () => {
   return DEFAULT_PROJECTS;
 };
 
+const getPropertyCategories = () => {
+  const defaultCategories = ['MUMBAI 3.0', 'PANVEL', 'PEN', 'PALI', 'MANGAON', 'KARJAT', 'KHOPOLI'];
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('parvat_property_categories');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((c: any) => c.toString().trim().toUpperCase());
+        }
+      } else {
+        localStorage.setItem('parvat_property_categories', JSON.stringify(defaultCategories));
+      }
+    } catch (e) {}
+  }
+  return defaultCategories;
+};
+
 const DEFAULT_BANNERS = [
   {
     id: 'pb1',
@@ -1027,7 +1045,10 @@ export default function App() {
   });
 
   // Hot Properties Tab filter state
-  const [activePropertyTab, setActivePropertyTab] = useState<string>('MUMBAI 3.0');
+  const [activePropertyTab, setActivePropertyTab] = useState<string>(() => {
+    const categories = getPropertyCategories();
+    return categories[0] || 'MUMBAI 3.0';
+  });
 
   // Selected Property Type Filter (for homepage and projects page)
   const [activeTypeTab, setActiveTypeTab] = useState<string>('ALL');
@@ -1071,9 +1092,9 @@ export default function App() {
 
   // Synchronize active property tab category with our actual focus areas
   useEffect(() => {
-    const categories = ['MUMBAI 3.0', 'PANVEL', 'PEN', 'PALI', 'MANGAON', 'KARJAT', 'KHOPOLI'];
-    if (!categories.includes(activePropertyTab.toUpperCase())) {
-      setActivePropertyTab('MUMBAI 3.0');
+    const categories = getPropertyCategories().map(c => c.toUpperCase());
+    if (categories.length > 0 && !categories.includes(activePropertyTab.toUpperCase())) {
+      setActivePropertyTab(categories[0]);
     }
   }, [activePropertyTab]);
 
@@ -2430,7 +2451,7 @@ export default function App() {
 
           {/* Interactive Location Tabs */}
           {(() => {
-            const categories = ['Mumbai 3.0', 'Panvel', 'Pen', 'Pali', 'Mangaon', 'Karjat', 'Khopoli'];
+            const categories = getPropertyCategories();
 
             return (
               <div className="flex flex-col gap-6 mb-12">
@@ -2679,7 +2700,15 @@ export default function App() {
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
               >
                 {brochures.map((brochure: any, idx: number) => {
-                  const messageText = `Hi Parvat Reality, I am interested in ${brochure.title}. Please share the layout plan.`;
+                  let messageText = `Hi Parvat Reality, I am interested in ${brochure.title}. Please share the layout plan.`;
+                  const lowerTitle = (brochure.title || '').toLowerCase();
+                  if (lowerTitle.includes('grandeur')) {
+                    messageText = "Hello Parvat Reality, I am interested in Parvat Grandeur Phase-I. Please send me the brochure.";
+                  } else if (lowerTitle.includes('nature meadows') || lowerTitle.includes('meadows')) {
+                    messageText = "Hello Parvat Reality, I want to know more about Nature Meadows. Please share the layout plan.";
+                  } else if (lowerTitle.includes('sunrise valley') || lowerTitle.includes('sunrise')) {
+                    messageText = "Hello Parvat Reality, please send me the Legal Title Certificates for Sunrise Valley.";
+                  }
                   const whatsappUrl = `https://api.whatsapp.com/send?phone=918591818166&text=${encodeURIComponent(messageText)}`;
                   
                   return (
@@ -3099,7 +3128,7 @@ export default function App() {
 
             {/* Dynamic Location Filter Tabs */}
             {(() => {
-              const categories = ['Mumbai 3.0', 'Panvel', 'Pen', 'Pali', 'Mangaon', 'Karjat', 'Khopoli'];
+              const categories = getPropertyCategories();
 
               return (
                 <div className="flex flex-col gap-6">
