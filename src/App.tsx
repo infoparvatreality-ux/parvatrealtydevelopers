@@ -949,6 +949,13 @@ export default function App() {
     return 'https://whatsapp.com/channel/0029Va9xyz';
   });
   const [isEnquireOpen, setIsEnquireOpen] = useState(false);
+  const [isPromoPopupOpen, setIsPromoPopupOpen] = useState(false);
+  const [promoFormData, setPromoFormData] = useState({
+    name: '',
+    phone: '',
+    location: 'Mumbai 3.0'
+  });
+  const [showPromoToast, setShowPromoToast] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeProjects, setActiveProjects] = useState<any[]>(() => {
@@ -1389,6 +1396,19 @@ export default function App() {
     };
   }, []);
 
+  // Promo Modal automatic trigger after 2 seconds (session-based)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasSeen = sessionStorage.getItem('hasSeenPopup');
+      if (!hasSeen) {
+        const timer = setTimeout(() => {
+          setIsPromoPopupOpen(true);
+        }, 2000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, []);
+
   // Hydrate news, categories and hero banner configs directly from physical server JSON file
   useEffect(() => {
     fetch('/api.php?action=get_news_ecosystem')
@@ -1733,6 +1753,63 @@ export default function App() {
         message: ''
       });
     }, 2500);
+  };
+
+  const handlePromoSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!promoFormData.name || !promoFormData.phone) return;
+
+    // Set session storage to prevent popping up again
+    sessionStorage.setItem('hasSeenPopup', 'true');
+    setIsPromoPopupOpen(false);
+
+    // Save lead to local storage and backend MySQL
+    const newLead = {
+      id: 'lead_' + Date.now(),
+      name: promoFormData.name,
+      phone: promoFormData.phone,
+      email: 'N/A',
+      age: 'N/A',
+      gender: 'Enquiry',
+      interest: `Promo Modal: ${promoFormData.location}`,
+      leadSource: 'Dynamic Promo Modal',
+      date: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+    };
+
+    try {
+      const existingLeadsStr = localStorage.getItem('parvat_leads');
+      const existingLeads = existingLeadsStr ? JSON.parse(existingLeadsStr) : [];
+      existingLeads.unshift(newLead);
+      localStorage.setItem('parvat_leads', JSON.stringify(existingLeads));
+
+      // Save to database via api.php
+      fetch('/api.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: promoFormData.name,
+          phone: promoFormData.phone,
+          details: `Source: Dynamic Promo Modal | Location Preference: ${promoFormData.location}`
+        })
+      }).catch(err => console.error("Failed to post lead to backend database:", err));
+    } catch (err) {
+      console.error("Error saving lead:", err);
+    }
+
+    // Show toast confirmation
+    setShowPromoToast(true);
+    setTimeout(() => {
+      setShowPromoToast(false);
+    }, 5000);
+
+    // Open WhatsApp Chat API with the dynamic location message
+    const message = `Hello Parvat Realty, I submitted an inquiry from your website promo popup for ${promoFormData.location}. Name: ${promoFormData.name}, Phone: ${promoFormData.phone}. Please send me the exclusive brochure and layout plans.`;
+    const whatsappUrl = `https://api.whatsapp.com/send?phone=918591818166&text=${encodeURIComponent(message)}`;
+    
+    // Redirect to WhatsApp in a new tab
+    setTimeout(() => {
+      window.open(whatsappUrl, '_blank');
+    }, 1000);
   };
 
   // Appointment Form submission handler
@@ -5063,6 +5140,115 @@ export default function App() {
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
         </svg>
       </a>
+
+      {/* AUTOMATIC ENTRY PROMO POPUP MODAL */}
+      {isPromoPopupOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-950/80 backdrop-blur-md">
+          <div className="relative w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-2xl shadow-2xl p-6 sm:p-8 animate-scaleIn overflow-y-auto max-h-[90vh]">
+            
+            {/* Close button */}
+            <button 
+              onClick={() => {
+                setIsPromoPopupOpen(false);
+                sessionStorage.setItem('hasSeenPopup', 'true');
+              }}
+              className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-white rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer"
+              aria-label="Close popup"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="text-center space-y-2 mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold tracking-wider text-amber-500 font-serif uppercase">
+                PARVAT REALITY AND DEVELOPERS
+              </h2>
+              <p className="text-xs sm:text-sm font-light text-neutral-300">
+                Explore Premium Land Projects in Mumbai 3.0 &amp; Raigad Belt
+              </p>
+              <div className="w-16 h-0.5 bg-amber-500/50 mx-auto mt-3 rounded-full" />
+            </div>
+
+            <form onSubmit={handlePromoSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
+                  Full Name
+                </label>
+                <input 
+                  type="text" 
+                  required
+                  value={promoFormData.name}
+                  onChange={(e) => setPromoFormData({ ...promoFormData, name: e.target.value })}
+                  placeholder="Enter your full name" 
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white rounded-xl px-4 py-3 text-xs sm:text-sm transition-colors outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
+                  Phone / WhatsApp Number
+                </label>
+                <input 
+                  type="tel" 
+                  required
+                  value={promoFormData.phone}
+                  onChange={(e) => setPromoFormData({ ...promoFormData, phone: e.target.value })}
+                  placeholder="e.g. +91 98765 43210" 
+                  className="w-full bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white rounded-xl px-4 py-3 text-xs sm:text-sm transition-colors outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-1.5">
+                  Location Preference
+                </label>
+                <div className="relative">
+                  <select 
+                    value={promoFormData.location}
+                    onChange={(e) => setPromoFormData({ ...promoFormData, location: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white rounded-xl px-4 py-3 pr-10 text-xs sm:text-sm transition-colors outline-none appearance-none"
+                  >
+                    <option value="Mumbai 3.0">Mumbai 3.0</option>
+                    <option value="Panvel">Panvel</option>
+                    <option value="Mangaon">Mangaon</option>
+                    <option value="Karjat">Karjat</option>
+                    <option value="Khopoli">Khopoli</option>
+                    <option value="Pen">Pen</option>
+                    <option value="Pali">Pali</option>
+                    <option value="Uran Taluka">Uran Taluka</option>
+                  </select>
+                  <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                className="w-full py-3 sm:py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold text-xs sm:text-sm tracking-wider uppercase rounded-xl shadow-lg shadow-amber-500/10 hover:shadow-amber-500/20 transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer mt-2"
+              >
+                Get Exclusive Offer &amp; Brochure
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* DYNAMIC CONFIRMATION TOAST */}
+      {showPromoToast && (
+        <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-neutral-900 border border-emerald-500/30 text-white rounded-xl px-5 py-3.5 shadow-2xl animate-fadeIn max-w-sm w-[calc(100%-2rem)]">
+          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-xs sm:text-sm font-semibold text-emerald-400">Request Submitted!</h4>
+            <p className="text-[10px] sm:text-xs text-neutral-300 font-light mt-0.5">Your exclusive brochure &amp; offer details are being sent via WhatsApp...</p>
+          </div>
+          <button 
+            onClick={() => setShowPromoToast(false)}
+            className="ml-auto text-neutral-400 hover:text-white"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* PREMIUM ENQUIRE MODAL OVERLAY */}
       {isEnquireOpen && (
