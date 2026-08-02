@@ -645,14 +645,14 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
 
   // Extract all images
   const images: string[] = [];
-  if (proj.image) {
-    images.push(proj.image);
+  if (proj.imageUrl && !images.includes(proj.imageUrl)) {
+    images.push(proj.imageUrl);
+  }
+  if (proj.base64Image && !images.includes(proj.base64Image)) {
+    images.push(proj.base64Image);
   }
   if (proj.coverImage && !images.includes(proj.coverImage)) {
     images.push(proj.coverImage);
-  }
-  if (proj.imageUrl && !images.includes(proj.imageUrl)) {
-    images.push(proj.imageUrl);
   }
   if (Array.isArray(proj.media)) {
     proj.media.forEach((m: any) => {
@@ -660,6 +660,9 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
         images.push(m.data);
       }
     });
+  }
+  if (proj.image && !images.includes(proj.image)) {
+    images.push(proj.image);
   }
 
   // Extract videos
@@ -676,7 +679,7 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   }
 
   const hasVideo = videos.length > 0;
-  const mainCover = images[0] || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1200&q=80';
+  const mainCover = images[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
   const secondaryImage = images[1] || images[0];
   const tertiaryImage = images[2] || images[1] || images[0];
   const remainingCount = images.length > 2 ? images.length - 2 : 0;
@@ -2624,12 +2627,12 @@ export default function App() {
                   {/* Image & Tag */}
                   <div className="relative h-[220px] overflow-hidden">
                     <img 
-                      src={property.image || property.coverImage || property.imageUrl || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
+                      src={property.imageUrl || property.base64Image || property.coverImage || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || property.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
                       alt={property.title} 
                       className="transition-transform duration-500 group-hover:scale-110"
                       style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -3307,12 +3310,12 @@ export default function App() {
                   {/* Image Holder */}
                   <div className="relative h-[220px] w-full overflow-hidden">
                     <img 
-                      src={proj.image || proj.coverImage || proj.imageUrl || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
+                      src={proj.imageUrl || proj.base64Image || proj.coverImage || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || proj.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
                       alt={proj.title} 
                       className="transition-transform duration-500 group-hover:scale-105"
                       style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -4926,12 +4929,12 @@ export default function App() {
                           >
                             <div className="relative h-[220px] w-full overflow-hidden">
                               <img 
-                                src={rec.image || rec.coverImage || rec.imageUrl || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
+                                src={rec.imageUrl || rec.base64Image || rec.coverImage || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || rec.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
                                 alt={rec.title} 
                                 className="transition-transform duration-500 group-hover:scale-105" 
                                 style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                                 onError={(e) => {
-                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80';
+                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
                                   e.currentTarget.onerror = null;
                                 }}
                               />
