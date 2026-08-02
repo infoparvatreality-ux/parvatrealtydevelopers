@@ -2062,9 +2062,9 @@ export default function App() {
     <div className="min-h-screen w-full overflow-x-hidden bg-neutral-950 font-sans antialiased text-neutral-200">
       
       {/* FIXED NAVBAR */}
-      <nav id="main-navbar" className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-24 md:h-28 lg:h-32">
+      <nav id="main-navbar" className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition-all duration-300 min-h-[140px] flex items-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+          <div className="flex items-center justify-between min-h-[140px] py-4">
             
             {/* Left Side: Brand Logo Header */}
             <div className="flex items-center">
@@ -2078,7 +2078,7 @@ export default function App() {
                   src="/logo.png" 
                   alt="Parvat Reality Logo" 
                   className="w-auto transition-all duration-300" 
-                  style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }}
+                  style={{ maxHeight: '130px', height: '120px', width: 'auto', objectFit: 'contain', imageRendering: 'high-quality' }}
                   referrerPolicy="no-referrer" 
                 />
               </a>
@@ -3195,7 +3195,7 @@ export default function App() {
       )}
 
       {activePage === 'projects' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950">
           <div className="max-w-7xl mx-auto space-y-16">
             
             {/* Elegant Header Title Section */}
@@ -3426,7 +3426,7 @@ export default function App() {
       )}
 
       {activePage === 'enquire' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950 min-h-[80vh] flex items-center">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950 min-h-[80vh] flex items-center">
           <div className="max-w-4xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-12 items-stretch">
             
             {/* Info Text Left Side */}
@@ -3594,7 +3594,7 @@ export default function App() {
       )}
 
       {activePage === 'about' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950">
           <div className="max-w-7xl mx-auto space-y-16">
             
             {/* Elegant Header Title Section */}
@@ -3799,7 +3799,7 @@ export default function App() {
       )}
 
       {activePage === 'journey' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950">
           <div className="max-w-7xl mx-auto space-y-16">
             
             {/* Elegant Header Title Section */}
@@ -3946,7 +3946,7 @@ export default function App() {
       )}
 
       {activePage === 'news' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950 min-h-screen">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950 min-h-screen">
           <div className="max-w-5xl mx-auto space-y-12">
             {!selectedNewsId ? (
               <>
@@ -4545,7 +4545,7 @@ export default function App() {
       )}
 
       {activePage === 'contact' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950">
           <div className="max-w-4xl mx-auto space-y-12">
             <div className="text-center space-y-4">
               <span className="text-amber-500 text-xs font-bold tracking-[0.3em] uppercase block">GET IN TOUCH</span>
@@ -4620,7 +4620,7 @@ export default function App() {
       )}
 
       {activePage === 'property' && (
-        <section className="pt-32 pb-24 px-4 md:px-8 bg-neutral-950 min-h-screen">
+        <section className="pt-[180px] pb-24 px-4 md:px-8 bg-neutral-950 min-h-screen">
           <div className="max-w-5xl mx-auto space-y-12">
             {(() => {
               const activeProjects = getProjects();
