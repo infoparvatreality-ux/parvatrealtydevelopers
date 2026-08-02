@@ -648,6 +648,12 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   if (proj.image) {
     images.push(proj.image);
   }
+  if (proj.coverImage && !images.includes(proj.coverImage)) {
+    images.push(proj.coverImage);
+  }
+  if (proj.imageUrl && !images.includes(proj.imageUrl)) {
+    images.push(proj.imageUrl);
+  }
   if (Array.isArray(proj.media)) {
     proj.media.forEach((m: any) => {
       if (m && m.type && typeof m.type === 'string' && m.type.startsWith('image/') && m.data && !images.includes(m.data)) {
@@ -2071,8 +2077,8 @@ export default function App() {
                 <img 
                   src="/logo.png" 
                   alt="Parvat Reality Logo" 
-                  className="h-20 sm:h-24 md:h-26 lg:h-28 w-auto object-contain transition-all duration-300 mix-blend-multiply" 
-                  style={{ mixBlendMode: 'multiply' }}
+                  className="w-auto transition-all duration-300" 
+                  style={{ maxHeight: '50px', width: 'auto', objectFit: 'contain' }}
                   referrerPolicy="no-referrer" 
                 />
               </a>
@@ -2616,11 +2622,12 @@ export default function App() {
                   className="group flex flex-col h-full bg-neutral-900 border border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
                 >
                   {/* Image & Tag */}
-                  <div className="relative h-32 sm:h-56 overflow-hidden">
+                  <div className="relative h-[200px] overflow-hidden">
                     <img 
-                      src={property.image} 
+                      src={property.image || property.coverImage || property.imageUrl || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
                       alt={property.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      className="transition-transform duration-500 group-hover:scale-110"
+                      style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/70 to-transparent" />
@@ -3294,11 +3301,12 @@ export default function App() {
                 >
                   
                   {/* Image Holder */}
-                  <div className="relative h-28 sm:h-48 md:h-56 w-full overflow-hidden">
+                  <div className="relative h-[200px] w-full overflow-hidden">
                     <img 
-                      src={proj.image} 
+                      src={proj.image || proj.coverImage || proj.imageUrl || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
                       alt={proj.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="transition-transform duration-500 group-hover:scale-105"
+                      style={{ width: '100%', height: '200px', objectFit: 'cover' }}
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-amber-500 text-neutral-950 text-[8px] sm:text-[10px] font-bold tracking-widest uppercase px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded">
@@ -4908,8 +4916,13 @@ export default function App() {
                             onClick={() => navigateTo('property', rec.id)}
                             className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-pointer group shadow-lg"
                           >
-                            <div className="relative h-40 w-full overflow-hidden">
-                              <img src={rec.image} alt={rec.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <div className="relative h-[200px] w-full overflow-hidden">
+                              <img 
+                                src={rec.image || rec.coverImage || rec.imageUrl || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80'} 
+                                alt={rec.title} 
+                                className="transition-transform duration-500 group-hover:scale-105" 
+                                style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+                              />
                               <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2 py-0.5 border border-neutral-800 rounded">
                                 <span className="text-amber-500 font-mono text-[9px] uppercase font-bold">{rec.tag || 'Plot'}</span>
                               </div>
