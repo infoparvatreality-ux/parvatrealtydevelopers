@@ -101,6 +101,113 @@ const getAmenityDetails = (amenity: string) => {
   return { Icon, bgClass, iconColor };
 };
 
+// Extract primary image source prioritizing direct database response fields
+const getItemPrimaryImage = (item: any): string => {
+  if (!item) return '';
+
+  // Priority 1: Direct database response links / uploaded files
+  if (item.newImageLink && typeof item.newImageLink === 'string' && item.newImageLink.trim()) return item.newImageLink.trim();
+  if (item.base64ImageData && typeof item.base64ImageData === 'string' && item.base64ImageData.trim()) return item.base64ImageData.trim();
+  if (item.uploadedFileName && typeof item.uploadedFileName === 'string' && item.uploadedFileName.trim()) {
+    const fn = item.uploadedFileName.trim();
+    if (fn.startsWith('http') || fn.startsWith('data:') || fn.startsWith('/')) {
+      return fn;
+    }
+  }
+
+  // Priority 2: Standard array of images (images)
+  if (Array.isArray(item.images) && item.images.length > 0) {
+    const first = item.images[0];
+    if (typeof first === 'string' && first.trim()) return first.trim();
+    if (first && typeof first === 'object') {
+      if (first.newImageLink) return first.newImageLink;
+      if (first.url) return first.url;
+      if (first.src) return first.src;
+      if (first.data) return first.data;
+      if (first.link) return first.link;
+    }
+  }
+
+  // Priority 3: Direct image fields
+  if (item.imageUrl && typeof item.imageUrl === 'string' && item.imageUrl.trim()) return item.imageUrl.trim();
+  if (item.bannerImage && typeof item.bannerImage === 'string' && item.bannerImage.trim()) return item.bannerImage.trim();
+  if (item.base64Image && typeof item.base64Image === 'string' && item.base64Image.trim()) return item.base64Image.trim();
+  if (item.coverImage && typeof item.coverImage === 'string' && item.coverImage.trim()) return item.coverImage.trim();
+  if (item.image && typeof item.image === 'string' && item.image.trim()) return item.image.trim();
+  if (item.photo && typeof item.photo === 'string' && item.photo.trim()) return item.photo.trim();
+  if (item.picture && typeof item.picture === 'string' && item.picture.trim()) return item.picture.trim();
+
+  // Priority 4: Media array
+  if (Array.isArray(item.media) && item.media.length > 0) {
+    const mediaImg = item.media.find((m: any) => m && (m.type?.startsWith?.('image/') || m.type === 'image' || m.data || m.url || m.src || m.link));
+    if (mediaImg) {
+      if (mediaImg.newImageLink) return mediaImg.newImageLink;
+      if (mediaImg.data) return mediaImg.data;
+      if (mediaImg.url) return mediaImg.url;
+      if (mediaImg.src) return mediaImg.src;
+      if (mediaImg.link) return mediaImg.link;
+    }
+  }
+
+  return '';
+};
+
+// Extract all images for an item for detail galleries
+const getItemAllImages = (item: any): string[] => {
+  if (!item) return [];
+  const list: string[] = [];
+  const add = (url: any) => {
+    if (typeof url === 'string' && url && url.trim() && !list.includes(url.trim())) {
+      list.push(url.trim());
+    }
+  };
+
+  add(item.newImageLink);
+  add(item.base64ImageData);
+  if (item.uploadedFileName && typeof item.uploadedFileName === 'string') {
+    const fn = item.uploadedFileName.trim();
+    if (fn.startsWith('http') || fn.startsWith('data:') || fn.startsWith('/')) {
+      add(fn);
+    }
+  }
+
+  if (Array.isArray(item.images)) {
+    item.images.forEach((img: any) => {
+      if (typeof img === 'string') add(img);
+      else if (img && typeof img === 'object') {
+        add(img.newImageLink);
+        add(img.url);
+        add(img.src);
+        add(img.data);
+        add(img.link);
+      }
+    });
+  }
+
+  add(item.bannerImage);
+  add(item.imageUrl);
+  add(item.base64Image);
+  add(item.coverImage);
+  add(item.image);
+  add(item.photo);
+  add(item.picture);
+
+  if (Array.isArray(item.media)) {
+    item.media.forEach((m: any) => {
+      if (typeof m === 'string') add(m);
+      else if (m && typeof m === 'object') {
+        add(m.newImageLink);
+        add(m.data);
+        add(m.url);
+        add(m.src);
+        add(m.link);
+      }
+    });
+  }
+
+  return list;
+};
+
 const DEFAULT_SLIDES = [
   {
     url: '/banner1.png',
@@ -467,27 +574,8 @@ function NewsMediaGallery({ item }: NewsMediaGalleryProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
 
-  // Extract all images
-  const images: string[] = [];
-  if (item?.imageUrl && !images.includes(item.imageUrl)) {
-    images.push(item.imageUrl);
-  }
-  if (item?.base64Image && !images.includes(item.base64Image)) {
-    images.push(item.base64Image);
-  }
-  if (item?.coverImage && !images.includes(item.coverImage)) {
-    images.push(item.coverImage);
-  }
-  if (item?.image && !images.includes(item.image)) {
-    images.push(item.image);
-  }
-  if (Array.isArray(item?.media)) {
-    item.media.forEach((m: any) => {
-      if (m && m.type && typeof m.type === 'string' && (m.type.startsWith('image/') || m.type === 'image') && m.data && !images.includes(m.data)) {
-        images.push(m.data);
-      }
-    });
-  }
+  // Extract all images using complete data source priority
+  const images: string[] = getItemAllImages(item);
   // Extract all videos
   const videos: string[] = [];
   if (item?.videoLink) {
@@ -659,39 +747,8 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
   const [activeImageIdx, setActiveImageIdx] = useState<number | null>(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
-  // Extract all images
-  const images: string[] = [];
-  if (Array.isArray(proj.images)) {
-    proj.images.forEach((img: any) => {
-      if (typeof img === 'string' && img && !images.includes(img)) {
-        images.push(img);
-      } else if (img && typeof img === 'object' && img.url && !images.includes(img.url)) {
-        images.push(img.url);
-      }
-    });
-  }
-  if (proj.bannerImage && !images.includes(proj.bannerImage)) {
-    images.push(proj.bannerImage);
-  }
-  if (proj.imageUrl && !images.includes(proj.imageUrl)) {
-    images.push(proj.imageUrl);
-  }
-  if (proj.base64Image && !images.includes(proj.base64Image)) {
-    images.push(proj.base64Image);
-  }
-  if (proj.coverImage && !images.includes(proj.coverImage)) {
-    images.push(proj.coverImage);
-  }
-  if (Array.isArray(proj.media)) {
-    proj.media.forEach((m: any) => {
-      if (m && m.type && typeof m.type === 'string' && m.type.startsWith('image/') && m.data && !images.includes(m.data)) {
-        images.push(m.data);
-      }
-    });
-  }
-  if (proj.image && !images.includes(proj.image)) {
-    images.push(proj.image);
-  }
+  // Extract all images using complete data source priority
+  const images: string[] = getItemAllImages(proj);
 
   // Extract videos
   const videos: string[] = [];
@@ -732,16 +789,18 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
         {/* Left: Large cover image */}
         <div 
           onClick={() => setActiveImageIdx(0)}
-          className="md:col-span-2 h-full relative cursor-pointer group overflow-hidden"
+          className="md:col-span-2 h-full relative cursor-pointer group overflow-hidden bg-neutral-950 flex items-center justify-center"
         >
           <img 
             src={mainCover} 
             alt="Main Cover" 
             onError={(e) => {
-              e.currentTarget.src = realEstateFallbackBanner;
+              if (e.currentTarget.src !== realEstateFallbackBanner) {
+                e.currentTarget.src = realEstateFallbackBanner;
+              }
               e.currentTarget.onerror = null;
             }}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -753,20 +812,22 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
         {/* Right Stack */}
         <div className="hidden md:flex flex-col gap-3 h-full">
           {/* Top-Right: Video or Secondary view */}
-          <div className="flex-1 relative overflow-hidden rounded-lg border border-neutral-850 bg-neutral-900 group">
+          <div className="flex-1 relative overflow-hidden rounded-lg border border-neutral-850 bg-neutral-950 flex items-center justify-center group">
             {hasVideo ? (
               <div 
                 onClick={() => setIsVideoPlaying(true)}
-                className="w-full h-full cursor-pointer relative"
+                className="w-full h-full cursor-pointer relative flex items-center justify-center"
               >
                 <img 
                   src={secondaryImage} 
                   alt="Video Thumbnail Background" 
                   onError={(e) => {
-                    e.currentTarget.src = realEstateFallbackBanner;
+                    if (e.currentTarget.src !== realEstateFallbackBanner) {
+                      e.currentTarget.src = realEstateFallbackBanner;
+                    }
                     e.currentTarget.onerror = null;
                   }}
-                  className="w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-contain opacity-80 transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-colors group-hover:bg-black/50">
@@ -781,16 +842,18 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
             ) : (
               <div 
                 onClick={() => setActiveImageIdx(images.length > 1 ? 1 : 0)}
-                className="w-full h-full cursor-pointer"
+                className="w-full h-full cursor-pointer flex items-center justify-center"
               >
                 <img 
                   src={secondaryImage} 
                   alt="Secondary View" 
                   onError={(e) => {
-                    e.currentTarget.src = realEstateFallbackBanner;
+                    if (e.currentTarget.src !== realEstateFallbackBanner) {
+                      e.currentTarget.src = realEstateFallbackBanner;
+                    }
                     e.currentTarget.onerror = null;
                   }}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
@@ -801,16 +864,18 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
           {/* Bottom-Right: Image overlay */}
           <div 
             onClick={() => setActiveImageIdx(images.length > 2 ? 2 : 0)}
-            className="flex-1 relative overflow-hidden rounded-lg border border-neutral-850 bg-neutral-900 cursor-pointer group"
+            className="flex-1 relative overflow-hidden rounded-lg border border-neutral-850 bg-neutral-950 cursor-pointer group flex items-center justify-center"
           >
             <img 
               src={tertiaryImage} 
               alt="Additional view" 
               onError={(e) => {
-                e.currentTarget.src = realEstateFallbackBanner;
+                if (e.currentTarget.src !== realEstateFallbackBanner) {
+                  e.currentTarget.src = realEstateFallbackBanner;
+                }
                 e.currentTarget.onerror = null;
               }}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
               referrerPolicy="no-referrer"
             />
             <div className="absolute inset-0 bg-neutral-950/70 flex flex-col items-center justify-center transition-colors group-hover:bg-neutral-950/60 p-4 text-center">
@@ -2673,14 +2738,16 @@ export default function App() {
                   className="group flex flex-col h-full bg-neutral-900 border border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden hover:border-amber-500/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
                 >
                   {/* Image & Tag */}
-                  <div className="relative h-[220px] overflow-hidden">
+                  <div className="relative h-[220px] overflow-hidden bg-neutral-950 flex items-center justify-center">
                     <img 
-                      src={property.imageUrl || property.base64Image || property.coverImage || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || property.image || '/banner1.png'} 
+                      src={getItemPrimaryImage(property) || '/banner1.png'} 
                       alt={property.title} 
-                      className="transition-transform duration-500 group-hover:scale-110"
-                      style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                      className="transition-transform duration-500 group-hover:scale-105"
+                      style={{ width: '100%', height: '220px', objectFit: 'contain' }}
                       onError={(e) => {
-                        e.currentTarget.src = '/banner1.png';
+                        if (e.currentTarget.src !== '/banner1.png') {
+                          e.currentTarget.src = '/banner1.png';
+                        }
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -3089,22 +3156,14 @@ export default function App() {
                     <div className="flex-1 flex flex-col">
                       {(() => {
                         const fallbackImg = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
-                        let finalSrc = item.imageUrl || item.base64Image || item.coverImage || item.image || '';
+                        let finalSrc = getItemPrimaryImage(item);
                         let isVideo = false;
 
-                        if (Array.isArray(item.media) && item.media.length > 0) {
-                          const mediaImg = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
+                        if (!finalSrc && Array.isArray(item.media) && item.media.length > 0) {
                           const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
-                          if (mediaImg && mediaImg.data) {
-                            finalSrc = mediaImg.data;
-                          } else if (mediaVideo && mediaVideo.data) {
-                            finalSrc = mediaVideo.data;
+                          if (mediaVideo && (mediaVideo.data || mediaVideo.url)) {
+                            finalSrc = mediaVideo.data || mediaVideo.url;
                             isVideo = true;
-                          } else if (item.media[0] && item.media[0].data) {
-                            finalSrc = item.media[0].data;
-                            if (item.media[0].type && typeof item.media[0].type === 'string' && item.media[0].type.startsWith('video/')) {
-                              isVideo = true;
-                            }
                           }
                         }
 
@@ -3114,7 +3173,7 @@ export default function App() {
 
                         return (
                           <div 
-                            className="relative w-full overflow-hidden" 
+                            className="relative w-full overflow-hidden bg-neutral-950" 
                             style={{ width: '100%', height: '200px', borderRadius: '8px 8px 0 0' }}
                           >
                             {isVideo ? (
@@ -3132,7 +3191,9 @@ export default function App() {
                                 src={finalSrc} 
                                 alt={item.title} 
                                 onError={(e) => {
-                                  e.currentTarget.src = fallbackImg;
+                                  if (e.currentTarget.src !== fallbackImg) {
+                                    e.currentTarget.src = fallbackImg;
+                                  }
                                   e.currentTarget.onerror = null;
                                 }}
                                 style={{ width: '100%', height: '200px', objectFit: 'cover' }}
@@ -3372,14 +3433,16 @@ export default function App() {
                 >
                   
                   {/* Image Holder */}
-                  <div className="relative h-[220px] w-full overflow-hidden">
+                  <div className="relative h-[220px] w-full overflow-hidden bg-neutral-950 flex items-center justify-center">
                     <img 
-                      src={(Array.isArray(proj.images) && proj.images.length > 0 ? (typeof proj.images[0] === 'string' ? proj.images[0] : proj.images[0]?.url) : '') || proj.bannerImage || proj.imageUrl || proj.base64Image || proj.coverImage || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || proj.image || '/banner1.png'} 
+                      src={getItemPrimaryImage(proj) || '/banner1.png'} 
                       alt={proj.title} 
                       className="transition-transform duration-500 group-hover:scale-105"
-                      style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                      style={{ width: '100%', height: '220px', objectFit: 'contain' }}
                       onError={(e) => {
-                        e.currentTarget.src = '/banner1.png';
+                        if (e.currentTarget.src !== '/banner1.png') {
+                          e.currentTarget.src = '/banner1.png';
+                        }
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -4229,22 +4292,14 @@ export default function App() {
                               <div className="flex-1 flex flex-col">
                                 {(() => {
                                   const fallbackImg = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
-                                  let finalSrc = item.imageUrl || item.base64Image || item.coverImage || item.image || '';
+                                  let finalSrc = getItemPrimaryImage(item);
                                   let isVideo = false;
 
-                                  if (Array.isArray(item.media) && item.media.length > 0) {
-                                    const mediaImg = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
+                                  if (!finalSrc && Array.isArray(item.media) && item.media.length > 0) {
                                     const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
-                                    if (mediaImg && mediaImg.data) {
-                                      finalSrc = mediaImg.data;
-                                    } else if (mediaVideo && mediaVideo.data) {
-                                      finalSrc = mediaVideo.data;
+                                    if (mediaVideo && (mediaVideo.data || mediaVideo.url)) {
+                                      finalSrc = mediaVideo.data || mediaVideo.url;
                                       isVideo = true;
-                                    } else if (item.media[0] && item.media[0].data) {
-                                      finalSrc = item.media[0].data;
-                                      if (item.media[0].type && typeof item.media[0].type === 'string' && item.media[0].type.startsWith('video/')) {
-                                        isVideo = true;
-                                      }
                                     }
                                   }
 
@@ -4254,7 +4309,7 @@ export default function App() {
 
                                   return (
                                     <div 
-                                      className="relative w-full overflow-hidden" 
+                                      className="relative w-full overflow-hidden bg-neutral-950" 
                                       style={{ width: '100%', height: '200px', borderRadius: '8px 8px 0 0' }}
                                     >
                                       {isVideo ? (
@@ -4272,7 +4327,9 @@ export default function App() {
                                           src={finalSrc} 
                                           alt={item.title} 
                                           onError={(e) => {
-                                            e.currentTarget.src = fallbackImg;
+                                            if (e.currentTarget.src !== fallbackImg) {
+                                              e.currentTarget.src = fallbackImg;
+                                            }
                                             e.currentTarget.onerror = null;
                                           }}
                                           style={{ width: '100%', height: '200px', objectFit: 'cover' }}
@@ -4580,16 +4637,7 @@ export default function App() {
                             >
                               {(() => {
                                 const fallbackImg = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
-                                let src = otherItem?.imageUrl || otherItem?.base64Image || otherItem?.coverImage || otherItem?.image || '';
-                                if (Array.isArray(otherItem?.media) && otherItem.media.length > 0) {
-                                  const mediaImg = otherItem.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
-                                  if (mediaImg && mediaImg.data) {
-                                    src = mediaImg.data;
-                                  } else if (otherItem.media[0] && otherItem.media[0].data) {
-                                    src = otherItem.media[0].data;
-                                  }
-                                }
-                                if (!src) src = fallbackImg;
+                                let src = getItemPrimaryImage(otherItem) || fallbackImg;
 
                                 return (
                                   <div className="relative h-40 w-full bg-neutral-950 overflow-hidden">
@@ -4597,7 +4645,9 @@ export default function App() {
                                       src={src} 
                                       alt={otherItem?.title || "News Image"} 
                                       onError={(e) => {
-                                        e.currentTarget.src = fallbackImg;
+                                        if (e.currentTarget.src !== fallbackImg) {
+                                          e.currentTarget.src = fallbackImg;
+                                        }
                                         e.currentTarget.onerror = null;
                                       }}
                                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
@@ -5007,14 +5057,16 @@ export default function App() {
                             onClick={() => navigateTo('property', rec.id)}
                             className="bg-neutral-900 border border-neutral-800 hover:border-amber-500/40 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1 transition-all duration-300 cursor-pointer group shadow-lg"
                           >
-                            <div className="relative h-[220px] w-full overflow-hidden">
+                            <div className="relative h-[220px] w-full overflow-hidden bg-neutral-950 flex items-center justify-center">
                               <img 
-                                src={(Array.isArray(rec.images) && rec.images.length > 0 ? (typeof rec.images[0] === 'string' ? rec.images[0] : rec.images[0]?.url) : '') || rec.bannerImage || rec.imageUrl || rec.base64Image || rec.coverImage || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || rec.image || '/banner1.png'} 
+                                src={getItemPrimaryImage(rec) || '/banner1.png'} 
                                 alt={rec.title} 
                                 className="transition-transform duration-500 group-hover:scale-105" 
-                                style={{ width: '100%', height: '220px', objectFit: 'cover' }}
+                                style={{ width: '100%', height: '220px', objectFit: 'contain' }}
                                 onError={(e) => {
-                                  e.currentTarget.src = '/banner1.png';
+                                  if (e.currentTarget.src !== '/banner1.png') {
+                                    e.currentTarget.src = '/banner1.png';
+                                  }
                                   e.currentTarget.onerror = null;
                                 }}
                               />
