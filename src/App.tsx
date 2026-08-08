@@ -661,6 +661,18 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
 
   // Extract all images
   const images: string[] = [];
+  if (Array.isArray(proj.images)) {
+    proj.images.forEach((img: any) => {
+      if (typeof img === 'string' && img && !images.includes(img)) {
+        images.push(img);
+      } else if (img && typeof img === 'object' && img.url && !images.includes(img.url)) {
+        images.push(img.url);
+      }
+    });
+  }
+  if (proj.bannerImage && !images.includes(proj.bannerImage)) {
+    images.push(proj.bannerImage);
+  }
   if (proj.imageUrl && !images.includes(proj.imageUrl)) {
     images.push(proj.imageUrl);
   }
@@ -694,10 +706,11 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
     });
   }
 
+  const realEstateFallbackBanner = '/banner1.png';
   const hasVideo = videos.length > 0;
-  const mainCover = images[0] || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
-  const secondaryImage = images[1] || images[0];
-  const tertiaryImage = images[2] || images[1] || images[0];
+  const mainCover = images[0] || realEstateFallbackBanner;
+  const secondaryImage = images[1] || images[0] || realEstateFallbackBanner;
+  const tertiaryImage = images[2] || images[1] || images[0] || realEstateFallbackBanner;
   const remainingCount = images.length > 2 ? images.length - 2 : 0;
 
   const getEmbedUrl = (url: string) => {
@@ -725,7 +738,7 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
             src={mainCover} 
             alt="Main Cover" 
             onError={(e) => {
-              e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
+              e.currentTarget.src = realEstateFallbackBanner;
               e.currentTarget.onerror = null;
             }}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -750,7 +763,7 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
                   src={secondaryImage} 
                   alt="Video Thumbnail Background" 
                   onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.src = realEstateFallbackBanner;
                     e.currentTarget.onerror = null;
                   }}
                   className="w-full h-full object-cover opacity-80 transition-transform duration-500 group-hover:scale-105"
@@ -774,7 +787,7 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
                   src={secondaryImage} 
                   alt="Secondary View" 
                   onError={(e) => {
-                    e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
+                    e.currentTarget.src = realEstateFallbackBanner;
                     e.currentTarget.onerror = null;
                   }}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -794,7 +807,7 @@ function PremiumHousingGallery({ proj }: { proj: any }) {
               src={tertiaryImage} 
               alt="Additional view" 
               onError={(e) => {
-                e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1200&q=80';
+                e.currentTarget.src = realEstateFallbackBanner;
                 e.currentTarget.onerror = null;
               }}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -2111,9 +2124,12 @@ export default function App() {
               >
                 <img 
                   src="/logo.png" 
-                  alt="Parvat Reality Logo" 
+                  alt="Parvat Reality" 
                   className="w-auto transition-all duration-300" 
-                  style={{ maxHeight: '130px', height: '120px', width: 'auto', objectFit: 'contain', imageRendering: 'high-quality' }}
+                  style={{ maxHeight: '120px', height: '120px', width: 'auto', objectFit: 'contain', imageRendering: 'high-quality' }}
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
                   referrerPolicy="no-referrer" 
                 />
               </a>
@@ -2659,12 +2675,12 @@ export default function App() {
                   {/* Image & Tag */}
                   <div className="relative h-[220px] overflow-hidden">
                     <img 
-                      src={property.imageUrl || property.base64Image || property.coverImage || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || property.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
+                      src={property.imageUrl || property.base64Image || property.coverImage || (property.media && property.media.length > 0 ? (property.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || property.media[0].data) : '') || property.image || '/banner1.png'} 
                       alt={property.title} 
                       className="transition-transform duration-500 group-hover:scale-110"
                       style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = '/banner1.png';
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -3076,18 +3092,14 @@ export default function App() {
                         let finalSrc = item.imageUrl || item.base64Image || item.coverImage || item.image || '';
                         let isVideo = false;
 
-                        if (finalSrc.includes('1560518883') || !finalSrc) {
-                          finalSrc = '';
-                        }
-
                         if (Array.isArray(item.media) && item.media.length > 0) {
-                          const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
                           const mediaImg = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
-                          if (mediaVideo && mediaVideo.data) {
+                          const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
+                          if (mediaImg && mediaImg.data) {
+                            finalSrc = mediaImg.data;
+                          } else if (mediaVideo && mediaVideo.data) {
                             finalSrc = mediaVideo.data;
                             isVideo = true;
-                          } else if (mediaImg && mediaImg.data) {
-                            finalSrc = mediaImg.data;
                           } else if (item.media[0] && item.media[0].data) {
                             finalSrc = item.media[0].data;
                             if (item.media[0].type && typeof item.media[0].type === 'string' && item.media[0].type.startsWith('video/')) {
@@ -3362,12 +3374,12 @@ export default function App() {
                   {/* Image Holder */}
                   <div className="relative h-[220px] w-full overflow-hidden">
                     <img 
-                      src={proj.imageUrl || proj.base64Image || proj.coverImage || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || proj.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
+                      src={(Array.isArray(proj.images) && proj.images.length > 0 ? (typeof proj.images[0] === 'string' ? proj.images[0] : proj.images[0]?.url) : '') || proj.bannerImage || proj.imageUrl || proj.base64Image || proj.coverImage || (proj.media && proj.media.length > 0 ? (proj.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || proj.media[0].data) : '') || proj.image || '/banner1.png'} 
                       alt={proj.title} 
                       className="transition-transform duration-500 group-hover:scale-105"
                       style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                       onError={(e) => {
-                        e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
+                        e.currentTarget.src = '/banner1.png';
                         e.currentTarget.onerror = null;
                       }}
                       referrerPolicy="no-referrer"
@@ -4220,18 +4232,14 @@ export default function App() {
                                   let finalSrc = item.imageUrl || item.base64Image || item.coverImage || item.image || '';
                                   let isVideo = false;
 
-                                  if (finalSrc.includes('1560518883') || !finalSrc) {
-                                    finalSrc = '';
-                                  }
-
                                   if (Array.isArray(item.media) && item.media.length > 0) {
-                                    const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
                                     const mediaImg = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
-                                    if (mediaVideo && mediaVideo.data) {
+                                    const mediaVideo = item.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('video/'));
+                                    if (mediaImg && mediaImg.data) {
+                                      finalSrc = mediaImg.data;
+                                    } else if (mediaVideo && mediaVideo.data) {
                                       finalSrc = mediaVideo.data;
                                       isVideo = true;
-                                    } else if (mediaImg && mediaImg.data) {
-                                      finalSrc = mediaImg.data;
                                     } else if (item.media[0] && item.media[0].data) {
                                       finalSrc = item.media[0].data;
                                       if (item.media[0].type && typeof item.media[0].type === 'string' && item.media[0].type.startsWith('video/')) {
@@ -4570,39 +4578,39 @@ export default function App() {
                               style={{ animationDelay: `${index * 120}ms` }}
                               className="bg-neutral-900 border border-neutral-800/80 hover:border-amber-500/30 rounded-xl flex flex-col overflow-hidden hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group shadow-lg text-left animate-fade-in-up"
                             >
-                              {Array.isArray(otherItem?.media) && otherItem.media.length > 0 ? (
-                                <div className="relative h-40 w-full flex overflow-x-auto snap-x snap-mandatory hide-scrollbar pointer-events-none bg-neutral-950">
-                                  {otherItem.media.map((m: any, idx: number) => (
-                                    <div key={idx} className="min-w-full h-full flex-shrink-0 snap-center relative overflow-hidden">
-                                      {m && m.type && typeof m.type === 'string' && m.type.startsWith('video/') ? (
-                                         <video src={m.data} className="w-full h-full object-cover bg-black transition-transform duration-700 ease-out group-hover:scale-105" muted loop playsInline autoPlay />
-                                      ) : (
-                                         <img src={m ? m.data : ''} alt={otherItem?.title || "News Image"} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                      )}
-                                    </div>
-                                  ))}
-                                  {otherItem.media.length > 1 && (
-                                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1 z-10 pointer-events-none">
-                                       {otherItem.media.map((_: any, idx: number) => (
-                                          <div key={idx} className="w-1 h-1 rounded-full bg-white/70 shadow-sm" />
-                                       ))}
-                                    </div>
-                                  )}
-                                </div>
-                              ) : otherItem?.image ? (
-                                <div className="relative h-40 w-full bg-neutral-950 overflow-hidden">
-                                  <img src={otherItem.image} alt={otherItem?.title || "News Image"} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" />
-                                  {otherItem?.videoLink && (
-                                    <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1">
-                                      <Play className="w-3.5 h-3.5 text-amber-500 fill-current" />
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="h-40 w-full bg-neutral-950/60 border-b border-neutral-800/50 flex items-center justify-center">
-                                  <span className="text-neutral-600 font-serif text-sm italic">Parvat Insights</span>
-                                </div>
-                              )}
+                              {(() => {
+                                const fallbackImg = 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80';
+                                let src = otherItem?.imageUrl || otherItem?.base64Image || otherItem?.coverImage || otherItem?.image || '';
+                                if (Array.isArray(otherItem?.media) && otherItem.media.length > 0) {
+                                  const mediaImg = otherItem.media.find((m: any) => m && m.type && typeof m.type === 'string' && m.type.startsWith('image/'));
+                                  if (mediaImg && mediaImg.data) {
+                                    src = mediaImg.data;
+                                  } else if (otherItem.media[0] && otherItem.media[0].data) {
+                                    src = otherItem.media[0].data;
+                                  }
+                                }
+                                if (!src) src = fallbackImg;
+
+                                return (
+                                  <div className="relative h-40 w-full bg-neutral-950 overflow-hidden">
+                                    <img 
+                                      src={src} 
+                                      alt={otherItem?.title || "News Image"} 
+                                      onError={(e) => {
+                                        e.currentTarget.src = fallbackImg;
+                                        e.currentTarget.onerror = null;
+                                      }}
+                                      className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
+                                      referrerPolicy="no-referrer"
+                                    />
+                                    {otherItem?.videoLink && (
+                                      <div className="absolute top-2 right-2 bg-black/60 backdrop-blur-md rounded-md p-1">
+                                        <Play className="w-3.5 h-3.5 text-amber-500 fill-current" />
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })()}
                               
                               <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
                                 <div className="space-y-2">
@@ -5001,12 +5009,12 @@ export default function App() {
                           >
                             <div className="relative h-[220px] w-full overflow-hidden">
                               <img 
-                                src={rec.imageUrl || rec.base64Image || rec.coverImage || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || rec.image || 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80'} 
+                                src={(Array.isArray(rec.images) && rec.images.length > 0 ? (typeof rec.images[0] === 'string' ? rec.images[0] : rec.images[0]?.url) : '') || rec.bannerImage || rec.imageUrl || rec.base64Image || rec.coverImage || (rec.media && rec.media.length > 0 ? (rec.media.find((m: any) => m.type && m.type.startsWith('image/'))?.data || rec.media[0].data) : '') || rec.image || '/banner1.png'} 
                                 alt={rec.title} 
                                 className="transition-transform duration-500 group-hover:scale-105" 
                                 style={{ width: '100%', height: '220px', objectFit: 'cover' }}
                                 onError={(e) => {
-                                  e.currentTarget.src = 'https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=800&q=80';
+                                  e.currentTarget.src = '/banner1.png';
                                   e.currentTarget.onerror = null;
                                 }}
                               />
