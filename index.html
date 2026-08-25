@@ -1,18 +1,715 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <link rel="stylesheet" href="theme.css">
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Parvat Reality</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script>
-      window.__initialPage = 'home';
-    </script>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#070a12" />
+  <title>Website Access Temporarily Suspended</title>
+  
+  <style>
+    /* ==========================================================================
+       CSS Reset & Variables
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-primary: #070a12;
+      --bg-surface: rgba(15, 23, 42, 0.72);
+      --bg-surface-hover: rgba(30, 41, 59, 0.8);
+      --border-subtle: rgba(148, 163, 184, 0.12);
+      --border-highlight: rgba(148, 163, 184, 0.22);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-amber: #f59e0b;
+      --accent-amber-light: #fbbf24;
+      --accent-amber-bg: rgba(245, 158, 11, 0.12);
+      --accent-amber-border: rgba(245, 158, 11, 0.32);
+      --accent-blue: #38bdf8;
+      --accent-blue-bg: rgba(56, 189, 248, 0.08);
+      --accent-blue-border: rgba(56, 189, 248, 0.25);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    html, body {
+      width: 100%;
+      min-height: 100%;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 100vh;
+      position: relative;
+      padding: 2rem 1.25rem;
+    }
+
+    /* ==========================================================================
+       Subtle Animated Corporate Dark Background
+       ========================================================================== */
+    .ambient-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 10%, #0f172a 0%, #070a12 70%);
+    }
+
+    .ambient-glow-1 {
+      position: absolute;
+      width: 650px;
+      height: 650px;
+      border-radius: 50%;
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.28) 0%, rgba(15, 23, 42, 0) 70%);
+      filter: blur(80px);
+      animation: pulseGlow 12s ease-in-out infinite alternate;
+    }
+
+    .ambient-glow-2 {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      bottom: -100px;
+      right: 15%;
+      background: radial-gradient(circle, rgba(14, 116, 144, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+      filter: blur(90px);
+      animation: shiftGlow 16s ease-in-out infinite alternate;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(148, 163, 184, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.8) 0%, transparent 75%);
+    }
+
+    @keyframes pulseGlow {
+      0% {
+        transform: translateX(-50%) scale(0.95);
+        opacity: 0.7;
+      }
+      100% {
+        transform: translateX(-50%) scale(1.15);
+        opacity: 1;
+      }
+    }
+
+    @keyframes shiftGlow {
+      0% {
+        transform: translate(0, 0) scale(0.9);
+        opacity: 0.5;
+      }
+      100% {
+        transform: translate(-40px, -30px) scale(1.1);
+        opacity: 0.85;
+      }
+    }
+
+    /* ==========================================================================
+       Main Layout Structure
+       ========================================================================== */
+    .page-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 760px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================================================
+       Status Warning Badge
+       ========================================================================== */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.5rem 1.15rem;
+      background: var(--accent-amber-bg);
+      border: 1px solid var(--accent-amber-border);
+      border-radius: 9999px;
+      color: var(--accent-amber-light);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 16px rgba(245, 158, 11, 0.12);
+      transition: all 0.3s ease;
+    }
+
+    .status-badge:hover {
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.18);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--accent-amber);
+      position: relative;
+      box-shadow: 0 0 8px var(--accent-amber);
+    }
+
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid var(--accent-amber);
+      animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes ping {
+      75%, 100% {
+        transform: scale(2.2);
+        opacity: 0;
+      }
+    }
+
+    /* ==========================================================================
+       Icon Shield Graphic
+       ========================================================================== */
+    .icon-shield-wrap {
+      width: 68px;
+      height: 68px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
+      border: 1px solid var(--border-highlight);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+      color: #94a3b8;
+      transition: transform 0.3s ease;
+    }
+
+    .icon-shield-wrap:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, 0.4);
+      color: var(--accent-blue);
+    }
+
+    .icon-shield-wrap svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    /* ==========================================================================
+       Headings & Description
+       ========================================================================== */
+    .main-headline {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      color: var(--text-primary);
+      margin-bottom: 1.15rem;
+      text-wrap: balance;
+    }
+
+    @media (min-width: 640px) {
+      .main-headline {
+        font-size: 2.75rem;
+      }
+    }
+
+    .subtext {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      max-width: 620px;
+      margin: 0 auto 2.5rem;
+      line-height: 1.65;
+      font-weight: 400;
+    }
+
+    @media (min-width: 640px) {
+      .subtext {
+        font-size: 1.125rem;
+      }
+    }
+
+    /* ==========================================================================
+       System Countdown Timer
+       ========================================================================== */
+    .timer-container {
+      width: 100%;
+      max-width: 580px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 20px;
+      padding: 1.75rem 1.5rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+      margin-bottom: 2rem;
+    }
+
+    .timer-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .timer-header svg {
+      width: 14px;
+      height: 14px;
+      color: var(--accent-blue);
+    }
+
+    .timer-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    @media (min-width: 640px) {
+      .timer-grid {
+        gap: 1.25rem;
+      }
+    }
+
+    .timer-card {
+      flex: 1;
+      min-width: 80px;
+      max-width: 130px;
+      background: rgba(10, 15, 29, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 1rem 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .timer-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    }
+
+    .timer-digit {
+      font-family: var(--font-mono);
+      font-size: 2.25rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    @media (min-width: 640px) {
+      .timer-digit {
+        font-size: 3rem;
+      }
+    }
+
+    .timer-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .timer-divider {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      opacity: 0.5;
+      margin-top: -1.25rem;
+      animation: blinkColon 2s infinite;
+    }
+
+    @keyframes blinkColon {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 0.2; }
+    }
+
+    /* ==========================================================================
+       Administrative Notice Card
+       ========================================================================== */
+    .admin-notice-box {
+      width: 100%;
+      max-width: 640px;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.45) 0%, rgba(15, 23, 42, 0.6) 100%);
+      border: 1px solid var(--border-highlight);
+      border-radius: 16px;
+      padding: 1.35rem 1.5rem;
+      display: flex;
+      align-items: flex-start;
+      text-align: left;
+      gap: 1rem;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.4);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .notice-icon-wrap {
+      flex-shrink: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: var(--accent-blue-bg);
+      border: 1px solid var(--accent-blue-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-blue);
+      margin-top: 0.1rem;
+    }
+
+    .notice-icon-wrap svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .notice-content {
+      flex: 1;
+    }
+
+    .notice-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .notice-text {
+      font-size: 0.925rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+    }
+
+    .protocol-meta-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem 1.75rem;
+      margin-bottom: 2.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+
+    .meta-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .meta-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--text-muted);
+    }
+
+    /* ==========================================================================
+       Footer
+       ========================================================================== */
+    .footer {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 480px) {
+      body {
+        padding: 1.5rem 1rem;
+      }
+      .main-headline {
+        font-size: 1.85rem;
+      }
+      .subtext {
+        font-size: 0.95rem;
+        margin-bottom: 1.75rem;
+      }
+      .timer-container {
+        padding: 1.25rem 1rem;
+      }
+      .timer-card {
+        min-width: 65px;
+        padding: 0.75rem 0.25rem;
+      }
+      .timer-digit {
+        font-size: 1.85rem;
+      }
+      .timer-label {
+        font-size: 0.6rem;
+      }
+      .timer-divider {
+        font-size: 1.5rem;
+      }
+      .admin-notice-box {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.15rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Animated Background Elements -->
+  <div class="ambient-background" aria-hidden="true">
+    <div class="ambient-glow-1"></div>
+    <div class="ambient-glow-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <!-- Main Suspension Content Container -->
+  <main class="page-container" id="main-content">
+    
+    <!-- Top Warning Status Badge -->
+    <div class="status-badge" id="status-badge" role="status" aria-live="polite">
+      <span class="pulse-dot" aria-hidden="true"></span>
+      <span>STATUS: TEMPORARY SERVICE SUSPENSION / BACKEND MAINTENANCE</span>
+    </div>
+
+    <!-- Security Shield Graphic -->
+    <div class="icon-shield-wrap" aria-hidden="true">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+
+    <!-- Main Headline -->
+    <h1 class="main-headline" id="main-title">
+      Website Access Temporarily Suspended
+    </h1>
+
+    <!-- Subtext & Description -->
+    <p class="subtext" id="main-description">
+      This portal is temporarily offline due to pending administrative clearance and scheduled backend maintenance. All navigation routes, pages, and interactive features are currently disabled by the administrator.
+    </p>
+
+    <!-- System Countdown Timer -->
+    <section class="timer-container" id="countdown-section" aria-label="System Maintenance Countdown Timer">
+      <div class="timer-header">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span>Estimated System Recovery Window</span>
+      </div>
+
+      <div class="timer-grid" role="timer" aria-live="off">
+        <!-- Hours Block -->
+        <div class="timer-card">
+          <span class="timer-digit" id="hours">24</span>
+          <span class="timer-label">Hours</span>
+        </div>
+
+        <span class="timer-divider" aria-hidden="true">:</span>
+
+        <!-- Minutes Block -->
+        <div class="timer-card">
+          <span class="timer-digit" id="minutes">00</span>
+          <span class="timer-label">Minutes</span>
+        </div>
+
+        <span class="timer-divider" aria-hidden="true">:</span>
+
+        <!-- Seconds Block -->
+        <div class="timer-card">
+          <span class="timer-digit" id="seconds">00</span>
+          <span class="timer-label">Seconds</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Administrative Notice Box -->
+    <div class="admin-notice-box" id="admin-notice-card">
+      <div class="notice-icon-wrap" aria-hidden="true">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+      </div>
+      <div class="notice-content">
+        <div class="notice-title">Administrative Notice</div>
+        <p class="notice-text">
+          To restore full public access and active routing, please complete pending administrative verifications.
+        </p>
+      </div>
+    </div>
+
+    <!-- Protocol Metadata Bar -->
+    <div class="protocol-meta-bar" aria-label="System Diagnostic Codes">
+      <span class="meta-item">
+        <span class="meta-dot"></span>
+        <span>PROTOCOL: SYS-CLEARANCE-7729</span>
+      </span>
+      <span class="meta-item">
+        <span class="meta-dot"></span>
+        <span>ROUTING: DISABLED</span>
+      </span>
+      <span class="meta-item">
+        <span class="meta-dot"></span>
+        <span>SECURITY LEVEL: 4</span>
+      </span>
+    </div>
+
+  </main>
+
+  <!-- Global Footer -->
+  <footer class="footer" id="site-footer">
+    <p>System Administrator Protocol | &copy; 2026 All Rights Reserved.</p>
+  </footer>
+
+  <!-- ==========================================================================
+       Embedded JavaScript Logic (Zero External Dependencies)
+       ========================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      // 24 Hours in seconds (24 * 60 * 60 = 86400)
+      const DURATION_SECONDS = 24 * 60 * 60;
+      const STORAGE_KEY = '__sys_suspension_timer_target__';
+
+      // Helper to pad single digits with leading zero
+      function padZero(num) {
+        return num < 10 ? '0' + num : String(num);
+      }
+
+      // Initialize or retrieve consistent target timestamp
+      function getTargetTimestamp() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const parsed = parseInt(stored, 10);
+            const now = Date.now();
+            // If target timestamp is in future, use it
+            if (!isNaN(parsed) && parsed > now) {
+              return parsed;
+            }
+          }
+        } catch (e) {
+          // LocalStorage fallback
+        }
+
+        // Calculate new 24h target
+        const newTarget = Date.now() + (DURATION_SECONDS * 1000);
+        try {
+          localStorage.setItem(STORAGE_KEY, String(newTarget));
+        } catch (e) {}
+        return newTarget;
+      }
+
+      const targetTime = getTargetTimestamp();
+
+      const hoursEl = document.getElementById('hours');
+      const minutesEl = document.getElementById('minutes');
+      const secondsEl = document.getElementById('seconds');
+
+      function updateCountdown() {
+        const now = Date.now();
+        let remainingMillis = targetTime - now;
+
+        if (remainingMillis <= 0) {
+          if (hoursEl) hoursEl.textContent = '00';
+          if (minutesEl) minutesEl.textContent = '00';
+          if (secondsEl) secondsEl.textContent = '00';
+          return;
+        }
+
+        const totalSeconds = Math.floor(remainingMillis / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        if (hoursEl) hoursEl.textContent = padZero(hours);
+        if (minutesEl) minutesEl.textContent = padZero(minutes);
+        if (secondsEl) secondsEl.textContent = padZero(seconds);
+      }
+
+      // Initial execution
+      updateCountdown();
+
+      // Live tick every second
+      const timerInterval = setInterval(updateCountdown, 1000);
+
+      // Clean up on unload
+      window.addEventListener('beforeunload', function () {
+        clearInterval(timerInterval);
+      });
+    })();
+  </script>
+</body>
 </html>
